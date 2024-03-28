@@ -27,3 +27,10 @@ export const toFixedIfNecessary = (value: string, dp: number): number => {
   return +parseFloat(value).toFixed(dp);
 };
 export const isNegative = (number) => number <= 0;
+
+export const AMOUNT_BALANCE_ENTRIES: [number, string, string][] = [
+    [0.25, '25%', 'one-quarter'],
+    [0.5, '50%', 'half'],
+    [0.75, '75%', 'three-quarters'],
+    [1, '100%', 'max']
+  ];

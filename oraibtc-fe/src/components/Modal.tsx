@@ -5,7 +5,7 @@ import styles from './Modal.module.scss';
 
 const ModalSafeForReact18 = ReactModal as ComponentType<ReactModal['props']>;
 
-ReactModal.setAppElement('#oraiswap');
+ReactModal.setAppElement('#oraibtc');
 
 const Modal: FC<Modal> = ({ className, isOpen, close, children, isCloseBtn = false }) => (
   <ModalSafeForReact18

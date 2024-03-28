@@ -72,7 +72,7 @@ const TokenItem: React.FC<TokenItemProps> = ({
         </div>
       </div>
       <div>
-        {isActive && (
+      {isActive && (
           <TransferConvertToken
             token={token}
             subAmounts={subAmounts}

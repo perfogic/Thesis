@@ -57,35 +57,6 @@ export const cosmosWallets: WalletNetwork[] = [
   }
 ];
 
-export const tronWallets: WalletNetwork[] = [
-  {
-    icon: OwalletIcon,
-    name: 'Owallet',
-    nameRegistry: 'owallet',
-    isActive: true
-  },
-  {
-    icon: TronIcon,
-    name: 'TronLink',
-    nameRegistry: 'tronLink',
-    isActive: true
-  }
-];
-
-export const evmWallets: WalletNetwork[] = [
-  {
-    icon: OwalletIcon,
-    name: 'Owallet',
-    nameRegistry: 'owallet',
-    isActive: true
-  },
-  {
-    icon: MetamaskIcon,
-    name: 'Metamask',
-    nameRegistry: 'metamask',
-    isActive: true
-  }
-];
 export const btcWallets: WalletNetwork[] = [
   {
     icon: OwalletIcon,
@@ -95,23 +66,13 @@ export const btcWallets: WalletNetwork[] = [
   }
 ];
 
-export const allWallets: WalletNetwork[] = [...cosmosWallets, ...tronWallets, ...evmWallets, ...btcWallets];
+export const allWallets: WalletNetwork[] = [...cosmosWallets, ...btcWallets];
 
 export const walletProvider: WalletProvider[] = [
   {
     networkType: 'cosmos',
     networks: cosmosNetworksWithIcon,
     wallets: cosmosWallets
-  },
-  {
-    networkType: 'evm',
-    networks: evmNetworksIconWithoutTron,
-    wallets: evmWallets
-  },
-  {
-    networkType: 'tron',
-    networks: tronNetworksWithIcon,
-    wallets: tronWallets
   },
   {
     networkType: 'bitcoin',

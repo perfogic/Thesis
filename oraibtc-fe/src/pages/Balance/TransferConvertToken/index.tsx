@@ -9,7 +9,6 @@ import {
   BigDecimal
   // flattenTokens
 } from '@oraichain/oraidex-common';
-import { isMobile } from '@walletconnect/browser-utils';
 import loadingGif from 'assets/gif/loading.gif';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
@@ -22,12 +21,12 @@ import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap, flattenTokens } from 'config/bridgeTokens';
 import { btcChains, evmChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
-import { feeEstimate, filterChainBridge, getAddressTransfer, networks, subNumber } from 'helper';
+import { filterChainBridge, getAddressTransfer, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTokenFee, { useRelayerFeeToken } from 'hooks/useTokenFee';
 import { reduceString } from 'libs/utils';
-import { AMOUNT_BALANCE_ENTRIES } from 'pages/UniversalSwap/helpers';
+import { AMOUNT_BALANCE_ENTRIES } from 'helper';
 import { FC, useEffect, useState } from 'react';
 import NumberFormat from 'react-number-format';
 import styles from './index.module.scss';

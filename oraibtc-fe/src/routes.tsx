@@ -4,6 +4,7 @@ import NotFound from 'pages/NotFound';
 import { Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import BitcoinDashboard from 'pages/BitcoinDashboard';
+import Balance from 'pages/Balance';
 
 export default () => (
   <Suspense
@@ -22,7 +23,7 @@ export default () => (
     }
   >
     <Routes>
-      <Route path="/bridge" element={<></>} />
+      <Route path="/bridge" element={<Balance/>} />
       <Route path="/bitcoin-dashboard" element={<BitcoinDashboard />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

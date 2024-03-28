@@ -15,15 +15,10 @@ import { useDispatch } from 'react-redux';
 import {
   CustomChainInfo,
   EVM_BALANCE_RETRY_COUNT,
-  ERC20__factory,
-  getEvmAddress,
-  tronToEthAddress
 } from '@oraichain/oraidex-common';
-import { isEvmNetworkNativeSwapSupported } from '@oraichain/oraidex-universal-swap';
-import { chainInfos, evmChains } from 'config/chainInfos';
+import { chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
 import { ethers } from 'ethers';
-import axios from 'rest/request';
 import { reduce } from 'lodash';
 import { getUtxos } from 'pages/Balance/helpers';
 import { bitcoinChainId } from 'helper/constants';
@@ -88,30 +83,11 @@ async function loadTokens(
           await Promise.all([
             loadTokensCosmos(dispatch, kawaiiAddress, oraiAddress),
             loadCw20Balance(dispatch, oraiAddress),
-            // different cointype but also require keplr connected by checking oraiAddress
-            loadKawaiiSubnetAmount(dispatch, kawaiiAddress)
           ]);
         }, 2000);
       }
     }
 
-    if (metamaskAddress) {
-      clearTimeout(timer[metamaskAddress]);
-      timer[metamaskAddress] = setTimeout(() => {
-        loadEvmAmounts(dispatch, metamaskAddress, evmChains);
-      }, 2000);
-    }
-
-    if (tronAddress) {
-      clearTimeout(timer[tronAddress]);
-      timer[tronAddress] = setTimeout(() => {
-        loadEvmAmounts(
-          dispatch,
-          tronToEthAddress(tronAddress),
-          chainInfos.filter((c) => c.chainId == '0x2b6653dc')
-        );
-      }, 2000);
-    }
     if (btcAddress) {
       clearTimeout(timer[btcAddress]);
       timer[btcAddress] = setTimeout(() => {
@@ -199,52 +175,6 @@ async function loadNativeBtcBalance(address: string, chain: CustomChainInfo) {
   return total;
 }
 
-async function loadEvmEntries(
-  address: string,
-  chain: CustomChainInfo,
-  multicallCustomContractAddress?: string,
-  retryCount?: number
-): Promise<[string, string][]> {
-  try {
-    const tokens = evmTokens.filter((t) => t.chainId === chain.chainId && t.contractAddress);
-    const nativeEvmToken = evmTokens.find(
-      (t) => !t.contractAddress && isEvmNetworkNativeSwapSupported(chain.chainId) && chain.chainId === t.chainId
-    );
-    if (!tokens.length) return [];
-    const multicall = new Multicall({
-      nodeUrl: chain.rpc,
-      multicallCustomContractAddress,
-      chainId: Number(chain.chainId)
-    });
-    const input = tokens.map((token) => ({
-      reference: token.denom,
-      contractAddress: token.contractAddress,
-      abi: ERC20__factory.abi,
-      calls: [
-        {
-          reference: token.denom,
-          methodName: 'balanceOf(address)',
-          methodParameters: [address]
-        }
-      ]
-    }));
-
-    const results: ContractCallResults = await multicall.call(input as any);
-    const nativeBalance = nativeEvmToken ? await loadNativeEvmBalance(address, chain) : 0;
-    let entries: [string, string][] = tokens.map((token) => {
-      const amount = results.results[token.denom].callsReturnContext[0].returnValues[0].hex;
-      return [token.denom, amount];
-    });
-    if (nativeEvmToken) entries.push([nativeEvmToken.denom, nativeBalance.toString()]);
-    return entries;
-  } catch (error) {
-    console.log('error querying EVM balance: ', error);
-    let retry = retryCount ? retryCount + 1 : 1;
-    if (retry >= EVM_BALANCE_RETRY_COUNT) console.error(`Cannot query EVM balance with error: ${error}`);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return loadEvmEntries(address, chain, multicallCustomContractAddress, retry);
-  }
-}
 async function loadBtcEntries(
   address: string,
   chain: CustomChainInfo,
@@ -266,31 +196,11 @@ async function loadBtcEntries(
   }
 }
 
-async function loadEvmAmounts(dispatch: Dispatch, evmAddress: string, chains: CustomChainInfo[]) {
-  const amountDetails = Object.fromEntries(
-    flatten(await Promise.all(chains.map((chain) => loadEvmEntries(evmAddress, chain))))
-  );
-
-  dispatch(updateAmounts(amountDetails));
-}
-
 async function loadBtcAmounts(dispatch: Dispatch, btcAddress: string, chains: CustomChainInfo[]) {
   const amountDetails = Object.fromEntries(
     flatten(await Promise.all(chains.map((chain) => loadBtcEntries(btcAddress, chain))))
   );
 
-  dispatch(updateAmounts(amountDetails));
-}
-
-async function loadKawaiiSubnetAmount(dispatch: Dispatch, kwtAddress: string) {
-  if (!kwtAddress) return;
-  const kawaiiInfo = chainInfos.find((c) => c.chainId === 'kawaii_6886-1');
-  loadNativeBalance(dispatch, kwtAddress, kawaiiInfo);
-
-  const kwtSubnetAddress = getEvmAddress(kwtAddress);
-  const kawaiiEvmInfo = chainInfos.find((c) => c.chainId === '0x1ae6');
-  let amountDetails = Object.fromEntries(await loadEvmEntries(kwtSubnetAddress, kawaiiEvmInfo));
-  // update amounts
   dispatch(updateAmounts(amountDetails));
 }
 

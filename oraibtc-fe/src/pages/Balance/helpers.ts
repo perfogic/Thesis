@@ -1,6 +1,6 @@
-import { ExecuteInstruction, ExecuteResult } from '@cosmjs/cosmwasm-stargate';
-import { Coin, coin } from '@cosmjs/proto-signing';
-import { DeliverTxResponse, GasPrice } from '@cosmjs/stargate';
+import { ExecuteInstruction, ExecuteResult } from "@cosmjs/cosmwasm-stargate";
+import { Coin, coin } from "@cosmjs/proto-signing";
+import { DeliverTxResponse, GasPrice } from "@cosmjs/stargate";
 // import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import {
   CosmosChainId,
@@ -19,35 +19,57 @@ import {
   parseTokenInfo,
   toAmount,
   CustomChainInfo,
-  validateNumber
-} from '@oraichain/oraidex-common';
-import { flattenTokens, kawaiiTokens, oraichainTokens, tokenMap } from 'config/bridgeTokens';
-import { chainInfos } from 'config/chainInfos';
-import { network } from 'config/networks';
-import { cosmosNetworks, feeEstimate, getNetworkGasPrice } from 'helper';
+  validateNumber,
+} from "@oraichain/oraidex-common";
+import {
+  flattenTokens,
+  kawaiiTokens,
+  oraichainTokens,
+  tokenMap,
+} from "config/bridgeTokens";
+import { chainInfos } from "config/chainInfos";
+import { network } from "config/networks";
+import { cosmosNetworks, feeEstimate, getNetworkGasPrice } from "helper";
 
-import { CwIcs20LatestClient } from '@oraichain/common-contracts-sdk';
-import { TransferBackMsg } from '@oraichain/common-contracts-sdk/build/CwIcs20Latest.types';
-import { OraiswapRouterQueryClient, OraiswapTokenClient } from '@oraichain/oraidex-contracts-sdk';
-import { Long } from 'cosmjs-types/helpers';
-import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx';
-import CosmJs, { collectWallet, connectWithSigner, getCosmWasmClient } from 'libs/cosmjs';
-import KawaiiverseJs from 'libs/kawaiiversejs';
-import { generateError } from 'libs/utils';
-import { Type, generateConvertCw20Erc20Message, generateConvertMsgs, generateMoveOraib2OraiMessages } from 'rest/api';
-import { RemainingOraibTokenItem } from './StuckOraib/useGetOraiBridgeBalances';
-import axios from 'rest/request';
-import { script, opcodes } from 'bitcoinjs-lib';
-import { useQuery } from '@tanstack/react-query';
-import { config } from 'libs/nomic/config';
-import QRCode from 'qrcode';
-import { useEffect, useState } from 'react';
-import { OraiBtcSubnetChain } from 'libs/nomic/models/ibc-chain';
-import { fromBech32, toBech32 } from '@cosmjs/encoding';
-import { BitcoinUnit } from 'bitcoin-units';
-import { MIN_DEPOSIT_BTC, MIN_WITHDRAW_BTC, bitcoinChainId, bitcoinLcd, btcNetwork } from 'helper/constants';
-import { NomicClient } from 'libs/nomic/models/nomic-client/nomic-client';
-import { handleSimulateSwap } from '@oraichain/oraidex-universal-swap';
+import { CwIcs20LatestClient } from "@oraichain/common-contracts-sdk";
+import { TransferBackMsg } from "@oraichain/common-contracts-sdk/build/CwIcs20Latest.types";
+import {
+  OraiswapRouterQueryClient,
+  OraiswapTokenClient,
+} from "@oraichain/oraidex-contracts-sdk";
+import { Long } from "cosmjs-types/helpers";
+import { MsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
+import CosmJs, {
+  collectWallet,
+  connectWithSigner,
+  getCosmWasmClient,
+} from "libs/cosmjs";
+import KawaiiverseJs from "libs/kawaiiversejs";
+import { generateError } from "libs/utils";
+import {
+  Type,
+  generateConvertCw20Erc20Message,
+  generateConvertMsgs,
+  generateMoveOraib2OraiMessages,
+} from "rest/api";
+import axios from "rest/request";
+import { script, opcodes } from "bitcoinjs-lib";
+import { useQuery } from "@tanstack/react-query";
+import { config } from "libs/nomic/config";
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
+import { OraiBtcSubnetChain } from "libs/nomic/models/ibc-chain";
+import { fromBech32, toBech32 } from "@cosmjs/encoding";
+import { BitcoinUnit } from "bitcoin-units";
+import {
+  MIN_DEPOSIT_BTC,
+  MIN_WITHDRAW_BTC,
+  bitcoinChainId,
+  bitcoinLcd,
+  btcNetwork,
+} from "helper/constants";
+import { NomicClient } from "libs/nomic/models/nomic-client/nomic-client";
+import { handleSimulateSwap } from "@oraichain/oraidex-universal-swap";
 
 export const transferIBC = async (data: {
   fromToken: TokenItemType;
@@ -65,14 +87,20 @@ export const transferIBC = async (data: {
     sender: fromAddress,
     receiver: toAddress,
     memo,
-    timeoutTimestamp: Long.fromString(calculateTimeoutTimestamp(ibcInfo.timeout)),
-    timeoutHeight: undefined
+    timeoutTimestamp: Long.fromString(
+      calculateTimeoutTimestamp(ibcInfo.timeout)
+    ),
+    timeoutHeight: undefined,
   };
   let feeDenom = fromToken.denom;
-  if (fromToken.denom.includes('ibc')) feeDenom = fromToken.prefix;
-  const result = await transferIBCMultiple(fromAddress, fromToken.chainId as CosmosChainId, fromToken.rpc, feeDenom, [
-    transferMsg
-  ]);
+  if (fromToken.denom.includes("ibc")) feeDenom = fromToken.prefix;
+  const result = await transferIBCMultiple(
+    fromAddress,
+    fromToken.chainId as CosmosChainId,
+    fromToken.rpc,
+    feeDenom,
+    [transferMsg]
+  );
   return result;
 };
 
@@ -82,7 +110,7 @@ export const transferIBCKwt = async (
   transferAmount: number,
   amounts: AmountDetails
 ): Promise<DeliverTxResponse> => {
-  if (transferAmount === 0) throw generateError('Transfer amount is empty');
+  if (transferAmount === 0) throw generateError("Transfer amount is empty");
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
   await window.Keplr.suggestChain(toToken.chainId);
@@ -90,29 +118,37 @@ export const transferIBCKwt = async (
   await window.Keplr.suggestChain(fromToken.chainId);
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
+  if (!fromAddress || !toAddress) throw generateError("Please login keplr!");
 
-  var amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
+  var amount = coin(
+    toAmount(transferAmount, fromToken.decimals).toString(),
+    fromToken.denom
+  );
 
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
   var customMessages: any[];
 
   // check if from token has erc20 map then we need to convert back to bep20 / erc20 first. TODO: need to filter if convert to ERC20 or BEP20
   if (fromToken.evmDenoms) {
-    const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, amount);
+    const msgConvertReverses = generateConvertCw20Erc20Message(
+      amounts,
+      fromToken,
+      fromAddress,
+      amount
+    );
     const executeContractMsgs = getEncodedExecuteContractMsgs(
       fromAddress,
       buildMultipleExecuteMessages(undefined, ...msgConvertReverses)
     );
     customMessages = executeContractMsgs.map((msg) => ({
       message: msg.value,
-      path: msg.typeUrl.substring(1)
+      path: msg.typeUrl.substring(1),
     }));
   }
 
   const result = await KawaiiverseJs.transferIBC({
     sender: fromAddress,
-    gasAmount: { denom: '200000', amount: '0' },
+    gasAmount: { denom: "200000", amount: "0" },
     ibcInfo: {
       sourcePort: ibcInfo.source,
       sourceChannel: ibcInfo.channel,
@@ -120,9 +156,9 @@ export const transferIBCKwt = async (
       denom: amount.denom,
       sender: fromAddress,
       receiver: toAddress,
-      timeoutTimestamp: ibcInfo.timeout
+      timeoutTimestamp: ibcInfo.timeout,
     },
-    customMessages
+    customMessages,
   });
   return result;
 };
@@ -132,7 +168,7 @@ export const convertTransferIBCErc20Kwt = async (
   toToken: TokenItemType,
   transferAmount: number
 ): Promise<DeliverTxResponse> => {
-  if (transferAmount === 0) throw generateError('Transfer amount is empty!');
+  if (transferAmount === 0) throw generateError("Transfer amount is empty!");
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
   await window.Keplr.suggestChain(toToken.chainId);
@@ -140,7 +176,7 @@ export const convertTransferIBCErc20Kwt = async (
   await window.Keplr.suggestChain(fromToken.chainId);
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
+  if (!fromAddress || !toAddress) throw generateError("Please login keplr!");
   const nativeToken = kawaiiTokens.find(
     (token) =>
       token.bridgeTo &&
@@ -149,12 +185,15 @@ export const convertTransferIBCErc20Kwt = async (
       token.denom !== fromToken.denom
   ); // collect kawaiiverse cosmos based token for conversion
 
-  const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), nativeToken.denom);
+  const amount = coin(
+    toAmount(transferAmount, fromToken.decimals).toString(),
+    nativeToken.denom
+  );
   const ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
 
   const result = await KawaiiverseJs.convertIbcTransferERC20({
     sender: fromAddress,
-    gasAmount: { denom: '200000', amount: '0' },
+    gasAmount: { denom: "200000", amount: "0" },
     ibcInfo: {
       sourcePort: ibcInfo.source,
       sourceChannel: ibcInfo.channel,
@@ -162,10 +201,10 @@ export const convertTransferIBCErc20Kwt = async (
       denom: amount.denom,
       sender: fromAddress,
       receiver: toAddress,
-      timeoutTimestamp: ibcInfo.timeout
+      timeoutTimestamp: ibcInfo.timeout,
     },
     amount: amount.amount,
-    contractAddr: fromToken?.contractAddress
+    contractAddr: fromToken?.contractAddress,
   });
   return result;
 };
@@ -178,19 +217,30 @@ export const transferIBCMultiple = async (
   messages: MsgTransfer[]
 ): Promise<DeliverTxResponse> => {
   const encodedMessages = messages.map((message) => ({
-    typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
-    value: MsgTransfer.fromPartial(message)
+    typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+    value: MsgTransfer.fromPartial(message),
   }));
   const offlineSigner = await collectWallet(fromChainId);
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
-  const client = await connectWithSigner(rpc, offlineSigner, fromChainId === 'injective-1' ? 'injective' : 'cosmwasm', {
-    gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromChainId)}${feeDenom}`),
-    broadcastPollIntervalMs: 600
-  });
+  const client = await connectWithSigner(
+    rpc,
+    offlineSigner,
+    fromChainId === "injective-1" ? "injective" : "cosmwasm",
+    {
+      gasPrice: GasPrice.fromString(
+        `${await getNetworkGasPrice(fromChainId)}${feeDenom}`
+      ),
+      broadcastPollIntervalMs: 600,
+    }
+  );
   // hardcode fix bug osmosis
-  let fee: 'auto' | number = 'auto';
-  if (fromChainId === 'osmosis-1') fee = 3;
-  const result = await client.signAndBroadcast(fromAddress, encodedMessages, fee);
+  let fee: "auto" | number = "auto";
+  if (fromChainId === "osmosis-1") fee = 3;
+  const result = await client.signAndBroadcast(
+    fromAddress,
+    encodedMessages,
+    fee
+  );
   return result as DeliverTxResponse;
 };
 
@@ -201,7 +251,7 @@ export const transferTokenErc20Cw20Map = async ({
   fromAddress,
   toAddress,
   ibcInfo,
-  ibcMemo
+  ibcMemo,
 }: {
   amounts: AmountDetails;
   transferAmount: number;
@@ -212,15 +262,26 @@ export const transferTokenErc20Cw20Map = async ({
   ibcMemo?: string;
 }): Promise<DeliverTxResponse> => {
   const evmToken = tokenMap[fromToken.evmDenoms[0]];
-  const evmAmount = coin(toAmount(transferAmount, evmToken.decimals).toString(), evmToken.denom);
+  const evmAmount = coin(
+    toAmount(transferAmount, evmToken.decimals).toString(),
+    evmToken.denom
+  );
 
-  const msgConvertReverses = generateConvertCw20Erc20Message(amounts, fromToken, fromAddress, evmAmount);
+  const msgConvertReverses = generateConvertCw20Erc20Message(
+    amounts,
+    fromToken,
+    fromAddress,
+    evmAmount
+  );
 
-  const executeContractMsgs = buildMultipleExecuteMessages(undefined, ...msgConvertReverses);
+  const executeContractMsgs = buildMultipleExecuteMessages(
+    undefined,
+    ...msgConvertReverses
+  );
   // note need refactor
   // get raw ibc tx
   const msgTransfer = {
-    typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
+    typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
     value: MsgTransfer.fromPartial({
       sourcePort: ibcInfo.source,
       sourceChannel: ibcInfo.channel,
@@ -228,21 +289,26 @@ export const transferTokenErc20Cw20Map = async ({
       sender: fromAddress,
       receiver: toAddress,
       memo: ibcMemo,
-      timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout)
-    })
+      timeoutTimestamp: calculateTimeoutTimestamp(ibcInfo.timeout),
+    }),
   };
 
   // Initialize the gaia api with the offline signer that is injected by Keplr extension.
   const { client } = await getCosmWasmClient(
     { rpc: fromToken.rpc, chainId: fromToken.chainId },
     {
-      gasPrice: GasPrice.fromString(`${await getNetworkGasPrice(fromToken.chainId)}${network.denom}`)
+      gasPrice: GasPrice.fromString(
+        `${await getNetworkGasPrice(fromToken.chainId)}${network.denom}`
+      ),
     }
   );
   const result = await client.signAndBroadcast(
     fromAddress,
-    [...getEncodedExecuteContractMsgs(fromAddress, executeContractMsgs), msgTransfer],
-    'auto'
+    [
+      ...getEncodedExecuteContractMsgs(fromAddress, executeContractMsgs),
+      msgTransfer,
+    ],
+    "auto"
   );
   return result;
 };
@@ -256,18 +322,26 @@ export const transferToRemoteChainIbcWasm = async (
   amount: string,
   ibcMemo: string
 ): Promise<ExecuteResult> => {
-  const ibcWasmContractAddress = ibcInfo.source.split('.')[1];
+  const ibcWasmContractAddress = ibcInfo.source.split(".")[1];
   if (!ibcWasmContractAddress)
-    throw generateError('IBC Wasm source port is invalid. Cannot transfer to the destination chain');
+    throw generateError(
+      "IBC Wasm source port is invalid. Cannot transfer to the destination chain"
+    );
 
   const { info: assetInfo } = parseTokenInfo(fromToken);
-  const ibcWasmContract = new CwIcs20LatestClient(window.client, fromAddress, ibcWasmContractAddress);
+  const ibcWasmContract = new CwIcs20LatestClient(
+    window.client,
+    fromAddress,
+    ibcWasmContractAddress
+  );
   try {
     // query if the cw20 mapping has been registered for this pair or not. If not => we switch to erc20cw20 map case
     await ibcWasmContract.pairMappingsFromAssetInfo({ assetInfo });
   } catch (error) {
     // switch ibc info to erc20cw20 map case, where we need to convert between ibc & cw20 for backward compatibility
-    throw generateError('Cannot transfer to remote chain because cannot find mapping pair');
+    throw generateError(
+      "Cannot transfer to remote chain because cannot find mapping pair"
+    );
   }
 
   // if asset info is native => send native way, else send cw20 way
@@ -276,27 +350,35 @@ export const transferToRemoteChainIbcWasm = async (
     remoteAddress: toAddress,
     remoteDenom: toToken.denom,
     timeout: ibcInfo.timeout,
-    memo: ibcMemo
+    memo: ibcMemo,
   };
   let result: ExecuteResult;
-  if ('native_token' in assetInfo) {
-    result = await ibcWasmContract.transferToRemote(msg, 'auto', undefined, [{ amount, denom: fromToken.denom }]);
+  if ("native_token" in assetInfo) {
+    result = await ibcWasmContract.transferToRemote(msg, "auto", undefined, [
+      { amount, denom: fromToken.denom },
+    ]);
   } else {
     const transferBackMsgCw20Msg: TransferBackMsg = {
       local_channel_id: msg.localChannelId,
       remote_address: msg.remoteAddress,
       remote_denom: msg.remoteDenom,
       timeout: msg.timeout,
-      memo: msg.memo
+      memo: msg.memo,
     };
-    const cw20Token = new OraiswapTokenClient(window.client, fromAddress, fromToken.contractAddress);
+    const cw20Token = new OraiswapTokenClient(
+      window.client,
+      fromAddress,
+      fromToken.contractAddress
+    );
     result = await cw20Token.send(
       {
         amount,
         contract: ibcWasmContractAddress,
-        msg: Buffer.from(JSON.stringify(transferBackMsgCw20Msg)).toString('base64')
+        msg: Buffer.from(JSON.stringify(transferBackMsgCw20Msg)).toString(
+          "base64"
+        ),
       },
-      'auto'
+      "auto"
     );
   }
   return result;
@@ -310,25 +392,38 @@ export const transferIbcCustom = async (
   amounts: AmountDetails,
   transferAddress?: string
 ): Promise<DeliverTxResponse> => {
-  if (transferAmount === 0) throw generateError('Transfer amount is empty');
+  if (transferAmount === 0) throw generateError("Transfer amount is empty");
   await window.Keplr.suggestChain(toToken.chainId);
   // enable from to send transaction
   await window.Keplr.suggestChain(fromToken.chainId);
   // check address
   const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
   const toAddress = await window.Keplr.getKeplrAddr(toToken.chainId);
-  if (!fromAddress || !toAddress) throw generateError('Please login keplr!');
-  if (toToken.chainId === 'oraibridge-subnet-2' && !toToken.prefix) throw generateError('Prefix Token not found!');
+  if (!fromAddress || !toAddress) throw generateError("Please login keplr!");
+  if (toToken.chainId === "oraibridge-subnet-2" && !toToken.prefix)
+    throw generateError("Prefix Token not found!");
 
-  let amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
-  const ibcMemo = toToken.chainId === 'oraibridge-subnet-2' ? toToken.prefix + transferAddress : '';
+  let amount = coin(
+    toAmount(transferAmount, fromToken.decimals).toString(),
+    fromToken.denom
+  );
+  const ibcMemo =
+    toToken.chainId === "oraibridge-subnet-2"
+      ? toToken.prefix + transferAddress
+      : "";
   let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
   // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
-  if (!transferAddress && (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)) {
-    throw generateError('Please login metamask!');
+  if (
+    !transferAddress &&
+    (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)
+  ) {
+    throw generateError("Please login metamask!");
   }
   // for KWT & MILKY tokens, we use the old ibc info channel
-  if (fromToken.evmDenoms || kawaiiTokens.find((i) => i.name === fromToken.name))
+  if (
+    fromToken.evmDenoms ||
+    kawaiiTokens.find((i) => i.name === fromToken.name)
+  )
     ibcInfo = ibcInfosOld[fromToken.chainId][toToken.chainId];
   let result: DeliverTxResponse;
   if (fromToken.evmDenoms) {
@@ -339,7 +434,7 @@ export const transferIbcCustom = async (
       fromAddress,
       toAddress,
       ibcInfo,
-      ibcMemo
+      ibcMemo,
     });
     return result;
   }
@@ -367,7 +462,7 @@ export const transferIbcCustom = async (
     fromAddress,
     toAddress,
     amount,
-    ibcInfo
+    ibcInfo,
   });
   return result;
 };
@@ -376,12 +471,18 @@ export const findDefaultToToken = (from: TokenItemType) => {
   if (!from.bridgeTo) return;
 
   return flattenTokens.find(
-    (t) => from.bridgeTo.includes(t.chainId) && from.name.includes(t.name) && from.chainId !== t.chainId
+    (t) =>
+      from.bridgeTo.includes(t.chainId) &&
+      from.name.includes(t.name) &&
+      from.chainId !== t.chainId
   );
 };
 
-export const convertKwt = async (transferAmount: number, fromToken: TokenItemType): Promise<DeliverTxResponse> => {
-  if (transferAmount === 0) throw new Error('Transfer amount is empty');
+export const convertKwt = async (
+  transferAmount: number,
+  fromToken: TokenItemType
+): Promise<DeliverTxResponse> => {
+  if (transferAmount === 0) throw new Error("Transfer amount is empty");
   const keplr = await window.Keplr.getKeplr();
   if (!keplr) return;
   await window.Keplr.suggestChain(fromToken.chainId);
@@ -391,22 +492,25 @@ export const convertKwt = async (transferAmount: number, fromToken: TokenItemTyp
     return;
   }
 
-  const amount = coin(toAmount(transferAmount, fromToken.decimals).toString(), fromToken.denom);
+  const amount = coin(
+    toAmount(transferAmount, fromToken.decimals).toString(),
+    fromToken.denom
+  );
 
   let result: DeliverTxResponse;
 
   if (!fromToken.contractAddress) {
     result = await KawaiiverseJs.convertCoin({
       sender: fromAddress,
-      gasAmount: { amount: '0', denom: KWT },
-      coin: amount
+      gasAmount: { amount: "0", denom: KWT },
+      coin: amount,
     });
   } else {
     result = await KawaiiverseJs.convertERC20({
       sender: fromAddress,
-      gasAmount: { amount: '0', denom: KWT },
+      gasAmount: { amount: "0", denom: KWT },
       amount: amount.amount,
-      contractAddr: fromToken?.contractAddress
+      contractAddr: fromToken?.contractAddress,
     });
   }
   return result;
@@ -415,27 +519,28 @@ export const convertKwt = async (transferAmount: number, fromToken: TokenItemTyp
 export const broadcastConvertTokenTx = async (
   amount: number,
   token: TokenItemType,
-  type: 'cw20ToNative' | 'nativeToCw20',
+  type: "cw20ToNative" | "nativeToCw20",
   outputToken?: TokenItemType
 ): Promise<ExecuteResult> => {
   const _fromAmount = toAmount(amount, token.decimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!oraiAddress) throw generateError('Please login both metamask and Keplr!');
+  if (!oraiAddress)
+    throw generateError("Please login both metamask and Keplr!");
   let msg: ExecuteInstruction;
-  if (type === 'nativeToCw20') {
+  if (type === "nativeToCw20") {
     msg = generateConvertMsgs({
       type: Type.CONVERT_TOKEN,
       sender: oraiAddress,
       inputAmount: _fromAmount,
-      inputToken: token
+      inputToken: token,
     });
-  } else if (type === 'cw20ToNative') {
+  } else if (type === "cw20ToNative") {
     msg = generateConvertMsgs({
       type: Type.CONVERT_TOKEN_REVERSE,
       sender: oraiAddress,
       inputAmount: _fromAmount,
       inputToken: token,
-      outputToken
+      outputToken,
     });
   }
   const result = await CosmJs.execute({
@@ -443,26 +548,9 @@ export const broadcastConvertTokenTx = async (
     address: msg.contractAddress,
     walletAddr: oraiAddress,
     handleMsg: msg.msg,
-    gasAmount: { denom: ORAI, amount: '0' },
-    funds: msg.funds
+    gasAmount: { denom: ORAI, amount: "0" },
+    funds: msg.funds,
   });
-  return result;
-};
-
-export const moveOraibToOraichain = async (remainingOraib: RemainingOraibTokenItem[]) => {
-  // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
-  const fromAddress = await window.Keplr.getKeplrAddr('oraibridge-subnet-2');
-  const toAddress = await window.Keplr.getKeplrAddr('Oraichain');
-  const transferMsgs = generateMoveOraib2OraiMessages(remainingOraib, fromAddress, toAddress);
-
-  // we can hardcode OraiBridge because we are transferring from the bridge to Oraichain
-  const result = await transferIBCMultiple(
-    fromAddress,
-    'oraibridge-subnet-2',
-    chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc,
-    'uoraib',
-    transferMsgs
-  );
   return result;
 };
 
@@ -471,7 +559,7 @@ export const calcMaxAmount = ({
   maxAmount,
   token,
   coeff,
-  gas = GAS_ESTIMATION_BRIDGE_DEFAULT
+  gas = GAS_ESTIMATION_BRIDGE_DEFAULT,
 }: {
   maxAmount: number;
   token: TokenItemType;
@@ -482,16 +570,24 @@ export const calcMaxAmount = ({
 
   let finalAmount = maxAmount;
 
-  const feeCurrencyOfToken = token.feeCurrencies?.find((e) => e.coinMinimalDenom === token.denom);
+  const feeCurrencyOfToken = token.feeCurrencies?.find(
+    (e) => e.coinMinimalDenom === token.denom
+  );
 
   if (feeCurrencyOfToken) {
     const useFeeEstimate = feeEstimate(token, gas);
 
     if (coeff === 1) {
-      finalAmount = useFeeEstimate > finalAmount ? 0 : new BigDecimal(finalAmount).sub(useFeeEstimate).toNumber();
+      finalAmount =
+        useFeeEstimate > finalAmount
+          ? 0
+          : new BigDecimal(finalAmount).sub(useFeeEstimate).toNumber();
     } else {
       finalAmount =
-        useFeeEstimate > new BigDecimal(maxAmount).sub(new BigDecimal(finalAmount).mul(coeff)).toNumber()
+        useFeeEstimate >
+        new BigDecimal(maxAmount)
+          .sub(new BigDecimal(finalAmount).mul(coeff))
+          .toNumber()
           ? 0
           : finalAmount;
     }
@@ -512,29 +608,40 @@ const MIN_TX_FEE = 1000;
 const truncDecimals = 8;
 const atomic = 10 ** truncDecimals;
 
-export const BTC_SCAN = 'https://blockstream.info';
+export const BTC_SCAN = "https://blockstream.info";
 
 const inputBytes = (input) => {
-  return TX_INPUT_BASE + (input.witnessUtxo?.script ? input.witnessUtxo?.script.length : TX_INPUT_PUBKEYHASH);
+  return (
+    TX_INPUT_BASE +
+    (input.witnessUtxo?.script
+      ? input.witnessUtxo?.script.length
+      : TX_INPUT_PUBKEYHASH)
+  );
 };
 
 export const getUtxos = async (address: string, baseUrl: string) => {
-  if (!address) throw Error('Address is not empty');
-  if (!baseUrl) throw Error('BaseUrl is not empty');
+  if (!address) throw Error("Address is not empty");
+  if (!baseUrl) throw Error("BaseUrl is not empty");
   const { data } = await axios({
     baseURL: baseUrl,
-    method: 'get',
-    url: `/address/${address}/utxo`
+    method: "get",
+    url: `/address/${address}/utxo`,
   });
   return data;
 };
-export const mapUtxos = ({ utxos, address, path = "m/84'/0'/0'/0/0", currentBlockHeight = 0 }) => {
+
+export const mapUtxos = ({
+  utxos,
+  address,
+  path = "m/84'/0'/0'/0/0",
+  currentBlockHeight = 0,
+}) => {
   let balance = 0;
   let utxosData = [];
   if (!utxos || utxos?.length === 0) {
     return {
       balance,
-      utxos: utxosData
+      utxos: utxosData,
     };
   }
   utxos.forEach((utxo) => {
@@ -549,27 +656,28 @@ export const mapUtxos = ({ utxos, address, path = "m/84'/0'/0'/0/0", currentBloc
       vout: utxo.vout, //Required (Same as tx_output_n)
       tx_hash: utxo.txid,
       tx_hash_big_endian: utxo.txid,
-      tx_output_n: utxo.vout
+      tx_output_n: utxo.vout,
     };
     utxosData.push(data);
   });
   return {
     balance,
-    utxos: utxosData
+    utxos: utxosData,
   };
 };
+
 export const getFeeRate = async ({ blocksWillingToWait = 2, url }) => {
-  if (!blocksWillingToWait) throw Error('blocksWillingToWait is not empty');
-  if (!url) throw Error('url is not empty');
+  if (!blocksWillingToWait) throw Error("blocksWillingToWait is not empty");
+  if (!url) throw Error("url is not empty");
   const { data: feeRate } = await axios({
     baseURL: url,
-    method: 'get',
-    url: `/fee-estimates`
+    method: "get",
+    url: `/fee-estimates`,
   });
 
   const feeRateByBlock = feeRate?.[blocksWillingToWait];
   if (!feeRateByBlock) {
-    throw Error('Not found Fee rate');
+    throw Error("Not found Fee rate");
   }
   return feeRateByBlock > MIN_FEE_RATE ? feeRateByBlock : MIN_FEE_RATE;
 };
@@ -595,13 +703,17 @@ const getFeeFromUtxos = (utxos, feeRate, data) => {
 };
 
 const compileMemo = (memo) => {
-  const data = Buffer.from(memo, 'utf8'); // converts MEMO to buffer
+  const data = Buffer.from(memo, "utf8"); // converts MEMO to buffer
   return script.compile([opcodes.OP_RETURN, data]); // Compile OP_RETURN script
 };
 
-export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message = '' }) => {
+export const calculatorTotalFeeBtc = ({
+  utxos = [],
+  transactionFee = 1,
+  message = "",
+}) => {
   if (message && message.length > 80) {
-    throw new Error('message too long, must not be longer than 80 chars.');
+    throw new Error("message too long, must not be longer than 80 chars.");
   }
   if (utxos.length === 0) return 0;
   const feeRateWhole = Math.ceil(transactionFee);
@@ -612,7 +724,7 @@ export const calculatorTotalFeeBtc = ({ utxos = [], transactionFee = 1, message 
 
 export const useGetWithdrawlFeesBitcoin = ({
   enabled,
-  bitcoinAddress
+  bitcoinAddress,
 }: {
   enabled: boolean;
   bitcoinAddress: string;
@@ -622,22 +734,26 @@ export const useGetWithdrawlFeesBitcoin = ({
     try {
       const { data } = await axios({
         baseURL: bitcoinLcd,
-        method: 'get',
-        url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`
+        method: "get",
+        url: `/bitcoin/withdrawal_fees/${bitcoinAddr}`,
       });
       return data;
     } catch (error) {
       console.log({ errorGetWithdrawFeeBTC: error });
       return {
-        withdrawal_fees: 0
+        withdrawal_fees: 0,
       };
     }
   };
 
-  const { data } = useQuery(['withdrawl_fees', bitcoinAddress, enabled], () => getWithdrawFeeBTC(bitcoinAddress), {
-    refetchOnWindowFocus: true,
-    enabled: !!bitcoinAddress && !!enabled
-  });
+  const { data } = useQuery(
+    ["withdrawl_fees", bitcoinAddress, enabled],
+    () => getWithdrawFeeBTC(bitcoinAddress),
+    {
+      refetchOnWindowFocus: true,
+      enabled: !!bitcoinAddress && !!enabled,
+    }
+  );
 
   return data;
 };
@@ -647,34 +763,41 @@ export const useDepositFeesBitcoin = (enabled: boolean) => {
     try {
       const { data } = await axios({
         baseURL: bitcoinLcd,
-        method: 'get',
-        url: `/bitcoin/deposit_fees`
+        method: "get",
+        url: `/bitcoin/deposit_fees`,
       });
       return data;
     } catch (error) {
       console.log({ errorGetDepositFeeBTC: error });
       return {
-        deposit_fees: 0
+        deposit_fees: 0,
       };
     }
   };
 
-  const { data } = useQuery(['deposit_fees', enabled], () => getDepositFeeBTC(), {
-    refetchOnWindowFocus: true,
-    enabled
-  });
+  const { data } = useQuery(
+    ["deposit_fees", enabled],
+    () => getDepositFeeBTC(),
+    {
+      refetchOnWindowFocus: true,
+      enabled,
+    }
+  );
 
   return data;
 };
 
 export const toAmountBTC = (amount: number | string, decimals = 8): bigint => {
   const validatedAmount = validateNumber(amount);
-  return BigInt(Math.trunc(validatedAmount * atomic)) * BigInt(10 ** (decimals - truncDecimals));
+  return (
+    BigInt(Math.trunc(validatedAmount * atomic)) *
+    BigInt(10 ** (decimals - truncDecimals))
+  );
 };
 
 export const useGetInfoBtc = () => {
   const { data: infoBTC } = useQuery(
-    ['estimate-btc-deposit'],
+    ["estimate-btc-deposit"],
     async () => {
       const nomic = new NomicClient();
       return await nomic.getConfig();
@@ -691,8 +814,8 @@ export const useGetInfoBtc = () => {
         min_withdrawal_amount: 0,
         min_withdrawal_checkpoints: 0,
         transfer_fee: 0,
-        units_per_sat: 0
-      }
+        units_per_sat: 0,
+      },
     }
   );
   return { infoBTC };
@@ -700,8 +823,9 @@ export const useGetInfoBtc = () => {
 
 export const satToBTC = (sat = 0, isDisplayAmount?: boolean) => {
   if (!sat) return 0;
-  if (isDisplayAmount) return new BitcoinUnit(sat, 'satoshi').to('BTC').getValueAsString();
-  return new BitcoinUnit(sat, 'satoshi').to('BTC').getValue();
+  if (isDisplayAmount)
+    return new BitcoinUnit(sat, "satoshi").to("BTC").getValueAsString();
+  return new BitcoinUnit(sat, "satoshi").to("BTC").getValue();
 };
 
 //==================================================> BTC <-> Oraichain <===========================================================================
@@ -713,15 +837,18 @@ export const calculateInputSize = (estWitnessSize: number) => {
   return estWitnessSize + 40; // 40 is a magic number
 };
 
-export const calculateFeeRateFromMinerFee = (minerFeeRate: number, estWitnessSize: number) => {
+export const calculateFeeRateFromMinerFee = (
+  minerFeeRate: number,
+  estWitnessSize: number
+) => {
   return (minerFeeRate * 10 ** 8) / estWitnessSize; // miner fee rate is in BTC, we * 10**8 to convert to sats
 };
 
 export const fiatToCrypto = ({ amount = 0, exchangeRate = 0 } = {}) => {
   try {
     amount = Number(amount);
-    BitcoinUnit.setFiat('usd', exchangeRate);
-    return new BitcoinUnit(amount, 'usd').to('satoshi').getValue().toFixed(0);
+    BitcoinUnit.setFiat("usd", exchangeRate);
+    return new BitcoinUnit(amount, "usd").to("satoshi").getValue().toFixed(0);
   } catch (e) {
     console.log(e);
   }
@@ -729,6 +856,7 @@ export const fiatToCrypto = ({ amount = 0, exchangeRate = 0 } = {}) => {
 
 export const BTCtoSat = (sat = 0, isDisplayAmount?: boolean) => {
   if (!sat) return 0;
-  if (isDisplayAmount) return new BitcoinUnit(sat, 'BTC').to('satoshi').getValueAsString();
-  return new BitcoinUnit(sat, 'BTC').to('satoshi').getValue();
+  if (isDisplayAmount)
+    return new BitcoinUnit(sat, "BTC").to("satoshi").getValueAsString();
+  return new BitcoinUnit(sat, "BTC").to("satoshi").getValue();
 };

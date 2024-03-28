@@ -52,7 +52,7 @@ const rpcClient = useHttp ? new HttpClient(network.rpc) : new WebsocketClient(ne
 window.client = new CosmWasmClient(new Tendermint37Client(rpcClient));
 
 const initApp = async () => {
-  const root = createRoot(document.getElementById('oraiswap'));
+  const root = createRoot(document.getElementById('oraibtc'));
   root.render(
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>

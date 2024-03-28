@@ -29,22 +29,17 @@ import LoadingBox from 'components/LoadingBox';
 import SearchInput from 'components/SearchInput';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
-import { cosmosTokens, tokens } from 'config/bridgeTokens';
-import { chainInfos } from 'config/chainInfos';
+import { tokens } from 'config/bridgeTokens';
 import { makeStdTx } from '@cosmjs/amino';
 import {
   getTransactionUrl,
-  handleErrorMsg,
   handleCheckWallet,
   handleErrorTransaction,
   networks,
   EVM_CHAIN_ID,
   handleCheckAddress,
-  subNumber,
-  handleCheckChainEvmWallet,
   getSpecialCoingecko
 } from 'helper';
-import { network as OraiNetwork } from 'config/networks';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
@@ -58,9 +53,6 @@ import { useNavigate, useNavigation, useSearchParams } from 'react-router-dom';
 import { getSubAmountDetails } from 'rest/api';
 import { RootState } from 'store/configure';
 import styles from './Balance.module.scss';
-import KwtModal from './KwtModal';
-import StuckOraib from './StuckOraib';
-import useGetOraiBridgeBalances from './StuckOraib/useGetOraiBridgeBalances';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import {
@@ -68,17 +60,14 @@ import {
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
   getUtxos,
-  moveOraibToOraichain,
   mapUtxos,
   transferIBCKwt,
   transferIbcCustom,
   getFeeRate,
   calculatorTotalFeeBtc,
-  BTC_SCAN
 } from './helpers';
-import { useGetFeeConfig, useUsdtToBtc } from 'hooks/useTokenFee';
+import { useGetFeeConfig } from 'hooks/useTokenFee';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import * as Sentry from '@sentry/react';
 import { SelectTokenModal } from 'components/Modals/SelectTokenModal';
 import { ReactComponent as TooltipIcon } from 'assets/icons/icon_tooltip.svg';
 import { NomicContext } from 'context/nomic-context';
@@ -90,8 +79,6 @@ import { TokenItemBtc } from './TokenItem/TokenItemBtc';
 import DepositBtcModal from './DepositBtcModal';
 import { bitcoinChainId } from 'helper/constants';
 import { config } from 'libs/nomic/config';
-import ModalConfirm from '../../components/ConfirmModal';
-import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { isMobile } from '@walletconnect/browser-utils';
 
@@ -545,31 +532,11 @@ const Balance: React.FC<BalanceProps> = () => {
 
   const totalUsd = getTotalUsd(amounts, prices);
 
-  // Move oraib2oraichain
-  const [moveOraib2OraiLoading, setMoveOraib2OraiLoading] = useState(false);
-  const { remainingOraib } = useGetOraiBridgeBalances(moveOraib2OraiLoading);
-  const handleMoveOraib2Orai = async () => {
-    try {
-      setMoveOraib2OraiLoading(true);
-      const result = await moveOraibToOraichain(remainingOraib);
-      processTxResult(chainInfos.find((c) => c.chainId === 'oraibridge-subnet-2').rpc, result);
-    } catch (error) {
-      console.log('error move stuck oraib: ', error);
-      displayToast(TToastType.TX_FAILED, {
-        message: error.message
-      });
-    } finally {
-      setMoveOraib2OraiLoading(false);
-    }
-  };
-
   const network = networks.find((n) => n.chainId === filterNetworkUI) ?? networks[0];
 
   return (
     <Content nonBackground>
       <div className={styles.wrapper}>
-        {/* Show popup that let user move stuck assets Oraibridge to Oraichain */}
-        <StuckOraib remainingOraib={remainingOraib} handleMove={handleMoveOraib2Orai} loading={moveOraib2OraiLoading} />
         <div className={styles.header}>
           <div className={styles.asset}>
             <span className={styles.totalAssets}>Total Assets</span>
@@ -695,7 +662,6 @@ const Balance: React.FC<BalanceProps> = () => {
             </div>
           </div>
         </LoadingBox>
-        {tokenUrl === 'kwt' && <KwtModal />}
         <SelectTokenModal
           isOpen={isSelectNetwork}
           open={() => setIsSelectNetwork(true)}
