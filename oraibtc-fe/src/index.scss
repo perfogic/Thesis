@@ -1,0 +1,153 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+@import 'src/styles/reboot';
+@import 'src/styles/utils';
+@import 'src/styles/themes';
+
+html,
+body {
+  font-family: $font-family;
+  width: 100%;
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+button {
+  transition: opacity 0.2s ease-in-out;
+  opacity: 1;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+button:disabled,
+button[disabled] {
+  opacity: 0.6;
+}
+
+.Toastify {
+  position: fixed;
+  z-index: 10000000;
+  padding: 16px 8px 16px 16px;
+
+  .Toastify__toast-theme--dark {
+    background-color: $raisin-black;
+    border-color: $outer-space;
+  }
+
+  .Toastify__toast-container--top-right {
+    top: 35px;
+    right: 35px;
+  }
+}
+
+.Toastify__toast-container {
+  z-index: 99 !important;
+  max-width: 360px !important;
+  min-width: 360px !important;
+
+  @media (max-width: 767px) {
+    min-width: 280px !important;
+    width: 100% !important;
+    padding: 0 20px !important;
+    right: 0 !important;
+    left: unset !important;
+  }
+}
+
+.Toastify__toast--default {
+  max-width: 360px !important;
+  min-width: 360px !important;
+  border-radius: 12px !important;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.1);
+  border: 1px solid;
+
+  @media (max-width: 767px) {
+    min-width: 280px !important;
+    margin-top: 10px;
+    width: 100%;
+  }
+}
+
+.Toastify__toast {
+  padding: 20px 12px 20px 20px !important;
+  overflow: visible !important;
+
+  @media (max-width: 767px) {
+    padding: 16px !important;
+  }
+
+  h6 {
+    color: $cultured;
+  }
+
+  p {
+    color: $neutron-text-body-dark;
+  }
+
+  &.light {
+    background: $white-color;
+    border-color: $gainsboro;
+
+    h6 {
+      color: $raisin-black;
+    }
+
+    p {
+      color: $neutron-text-body-light;
+    }
+  }
+}
+
+.Toastify__toast-body {
+  padding: 0 !important;
+}
+
+#basement {
+  min-height: 100vh;
+}
+
+@font-face {
+  font-family: $font-family;
+  src: url('./assets/fonts/IBMPlexSans-Bold.ttf');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: $font-family;
+  src: url('./assets/fonts/IBMPlexSans-SemiBold.ttf');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: $font-family;
+  src: url('./assets/fonts/IBMPlexSans-Medium.ttf');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: $font-family;
+  src: url('./assets/fonts/IBMPlexSans-Regular.ttf');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 8px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}

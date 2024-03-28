@@ -1,0 +1,31 @@
+@import 'src/styles/mixins';
+@import 'src/styles/variables';
+
+.content {
+  background-image: url(../assets/images/background_dark.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-color: $primary-background;
+
+  &.light {
+    background-color: $white-color;
+  }
+
+  flex-grow: 1;
+  height: auto;
+  width: 100%;
+  padding-left: 60px;
+  padding-right: 60px;
+  padding-top: 40px;
+
+  @include mobile {
+    min-height: calc(100vh - 90px);
+    padding: 24px 8px 24px 8px;
+  }
+
+  @include medium-desktop {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
