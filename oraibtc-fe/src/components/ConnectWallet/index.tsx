@@ -10,7 +10,6 @@ import QRGeneratorModal, { QRGeneratorInfo } from './QRGenerator';
 import Connected from './Connected';
 import ChooseWalletModal from './ChooseWallet';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { useInactiveConnect } from 'hooks/useMetamask';
 import { CustomChainInfo, NetworkChainId, WalletType } from '@oraichain/oraidex-common';
 import { chainInfos, evmChains } from 'config/chainInfos';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
@@ -218,34 +217,11 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const [wallets, setWallets] = useState<WalletItem[]>(walletInit);
   const [connectStatus, setConnectStatus] = useState(CONNECT_STATUS.SELECTING);
   const loadTokenAmounts = useLoadTokens();
-  const connect = useInactiveConnect();
   const [QRUrlInfo, setQRUrlInfo] = useState<QRGeneratorInfo>({ url: '', icon: null, name: '', address: '' });
   const [walletTypeActive, setWalletTypeActive] = useState(null);
   const isCheckKeplr = !isEmptyObject(cosmosAddress) && keplrCheck('keplr');
   const isCheckOwallet = !isEmptyObject(cosmosAddress) && owalletCheck('owallet');
-  const connectMetamask = async () => {
-    try {
-      const isMetamask = !!window.ethereum.isMetaMask;
-      if (isMetamask) {
-        const isUnlock = await isUnlockMetamask();
-        if (!isUnlock) {
-          displayToast(TToastType.METAMASK_FAILED, { message: 'Please unlock Metamask wallet' });
-          throw new Error('Please unlock Metamask wallet');
-        }
-      } else if (!isCheckOwallet && !isMetamask) {
-        displayToast(TToastType.METAMASK_FAILED, { message: 'Please install Metamask wallet' });
-        throw new Error('Please install Metamask wallet');
-      }
-      // if chain id empty, we switch to default network which is BSC
-      if (!window.ethereum || !window.ethereum.chainId) {
-        await window.Metamask.switchNetwork(Networks.bsc);
-      }
-      await connect();
-    } catch (ex) {
-      console.log('error in connecting metamask: ', ex);
-      throw new Error('Connect Metamask failed');
-    }
-  };
+
   const connectBitcoin = async () => {
     try {
       const btcAddress = await window.Bitcoin.getAddress();
@@ -459,24 +435,6 @@ const ConnectWallet: FC<ModalProps> = ({}) => {
   const requestMethod = async (walletType: WALLET_TYPES, method: METHOD_WALLET_TYPES) => {
     setWalletTypeActive(walletType);
     switch (walletType) {
-      case WALLET_TYPES.METAMASK:
-        if (method === METHOD_WALLET_TYPES.START) {
-          await startMetamask();
-        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-          await handleConnectWallet(connectMetamask);
-        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-          await disconnectMetamask();
-        }
-        break;
-      case WALLET_TYPES.METAMASK_LEAP_SNAP:
-        if (method === METHOD_WALLET_TYPES.START) {
-          await startMetamaskLeapSnap();
-        } else if (method === METHOD_WALLET_TYPES.CONNECT) {
-          await handleConnectWallet(connectDetectLeapSnap);
-        } else if (method === METHOD_WALLET_TYPES.DISCONNECT) {
-          await disconnectMetamaskLeapSnap();
-        }
-        break;
       case WALLET_TYPES.OWALLET:
         if (method === METHOD_WALLET_TYPES.START) {
           await startOwallet();

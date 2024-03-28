@@ -6,7 +6,6 @@ import { useResetBalance } from 'components/ConnectWallet/useResetBalance';
 import { keplrCheck } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
-import { useInactiveConnect } from 'hooks/useMetamask';
 import useWalletReducer from 'hooks/useWalletReducer';
 import { FC, useEffect, useState } from 'react';
 import Connected from './Connected';
@@ -21,14 +20,11 @@ const cx = cn.bind(styles);
 export const WalletManagement: FC<{}> = () => {
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
-  const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const { handleResetBalance } = useResetBalance();
   const loadTokenAmounts = useLoadTokens();
   const mobileMode = isMobile();
-  useInactiveConnect();
 
   const [walletProviderWithStatus, setWalletProviderWithStatus] = useState<WalletProvider[]>(walletProvider);
   const [isShowChooseWallet, setIsShowChooseWallet] = useState(false);
@@ -55,15 +51,6 @@ export const WalletManagement: FC<{}> = () => {
             case 'owallet':
               isActive = isCheckOwallet;
               break;
-            case 'metamask':
-              isActive = isMetamask;
-              break;
-            case 'tronLink':
-              isActive = isTronLink;
-              break;
-            case 'eip191':
-              isActive = isMetamask;
-              break;
             case 'bitcoin':
               isActive = isCheckOwallet;
               break;
@@ -82,7 +69,7 @@ export const WalletManagement: FC<{}> = () => {
 
   // load balance every time change address
   useEffect(() => {
-    const addresses = { oraiAddress, tronAddress, metamaskAddress, btcAddress };
+    const addresses = { oraiAddress, btcAddress };
     const filteredAddresses = {};
 
     for (const key in addresses) {
@@ -93,20 +80,18 @@ export const WalletManagement: FC<{}> = () => {
     if (Object.keys(filteredAddresses).length > 0) {
       loadTokenAmounts(filteredAddresses);
     }
-  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
+  }, [oraiAddress, btcAddress]);
 
   // reset balance when disconnect
   useEffect(() => {
-    if (!metamaskAddress || !tronAddress || !oraiAddress || !btcAddress) {
+    if (!oraiAddress || !btcAddress) {
       let arrResetBalance: WalletResetType[] = [];
-      if (!metamaskAddress) arrResetBalance.push('metamask');
-      if (!tronAddress) arrResetBalance.push('tron');
       if (!oraiAddress) arrResetBalance.push('keplr');
       if (!btcAddress) arrResetBalance.push('bitcoin');
       arrResetBalance.length && handleResetBalance(arrResetBalance);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oraiAddress, tronAddress, metamaskAddress, btcAddress]);
+  }, [oraiAddress, btcAddress]);
 
   const isAnyWalletConnected = Object.values(walletByNetworks).some((wallet) => wallet !== null);
   useEffect(() => {

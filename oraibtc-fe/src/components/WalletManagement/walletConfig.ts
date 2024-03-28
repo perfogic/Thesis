@@ -44,12 +44,6 @@ export const cosmosWallets: WalletNetwork[] = [
     isActive: true
   },
   {
-    icon: MetamaskIcon,
-    name: 'Metamask (Oraichain)',
-    nameRegistry: 'eip191',
-    isActive: true
-  },
-  {
     icon: KeplrIcon,
     name: 'Keplr',
     nameRegistry: 'keplr',

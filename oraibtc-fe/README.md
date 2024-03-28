@@ -1,5 +1,5 @@
 <h2 align="center">
-  Oraidex's Frontend
+  OraiBTC's Old Frontend
 </h2>
 
 ## Overview

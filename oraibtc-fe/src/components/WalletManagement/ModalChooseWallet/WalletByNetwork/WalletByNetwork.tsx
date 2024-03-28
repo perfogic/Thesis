@@ -11,7 +11,6 @@ import { initClient } from 'libs/utils';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
-import { useInactiveConnect } from 'hooks/useMetamask';
 import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
@@ -28,7 +27,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
-  const connect = useInactiveConnect();
 
   const handleConfirmSwitch = async () => {
     setConnectStatus('loading');
@@ -51,32 +49,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     }
   };
 
-  const handleConnectWalletInEvmNetwork = async (walletType: WalletType) => {
-    if (walletType === 'owallet') await triggerUnlockOwalletInEvmNetwork(networkType as ChainEnableByNetwork);
-
-    // re-polyfill ethereum for dapp
-    window.ethereumDapp = walletType === 'owallet' ? window.eth_owallet : window.ethereum;
-
-    // if chain id empty, we switch to default network which is BSC
-    if (!window.ethereumDapp || !window.ethereumDapp.chainId) {
-      await window.Metamask.switchNetwork(Networks.bsc);
-    }
-    await connect();
-  };
-
-  const handleConnectWalletInTronNetwork = async (walletType: WalletType) => {
-    if (walletType === 'owallet') await triggerUnlockOwalletInEvmNetwork(networkType as ChainEnableByNetwork);
-
-    // re-polyfill tronWeb
-    window.tronWebDapp = walletType === 'owallet' ? window.tronWeb_owallet : window.tronWeb;
-    window.tronLinkDapp = walletType === 'owallet' ? window.tronLink_owallet : window.tronLink;
-
-    window.Metamask = new Metamask(window.tronWebDapp);
-
-    const { tronAddress } = await switchWalletTron(walletType);
-    setTronAddress(tronAddress);
-  };
-
   const handleConnectWalletInBtcNetwork = async (walletType: WalletType) => {
     if (walletType === 'owallet') {
       // TODO: need check when use multi wallet support bitcoin
@@ -91,12 +63,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       switch (networkType) {
         case 'cosmos':
           await handleConnectWalletInCosmosNetwork(wallet.nameRegistry as WalletCosmosType);
-          break;
-        case 'evm':
-          await handleConnectWalletInEvmNetwork(wallet.nameRegistry);
-          break;
-        case 'tron':
-          await handleConnectWalletInTronNetwork(wallet.nameRegistry as WalletCosmosType);
           break;
         case 'bitcoin':
           await handleConnectWalletInBtcNetwork(wallet.nameRegistry);
