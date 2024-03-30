@@ -85,17 +85,8 @@ export const getSpecialCoingecko = (fromCoingecko: string, toCoingecko: string) 
 
 export const getTransactionUrl = (chainId: NetworkChainId, transactionHash: string) => {
   switch (Number(chainId)) {
-    case Networks.bsc:
-      return `${BSC_SCAN}/tx/${transactionHash}`;
-    case Networks.mainnet:
-      return `${ETHEREUM_SCAN}/tx/${transactionHash}`;
-    case Networks.tron:
-      return `${TRON_SCAN}/#/transaction/${transactionHash.replace(/^0x/, '')}`;
     default:
-      // raw string
       switch (chainId) {
-        case 'kawaii_6886-1':
-          return `${KWT_SCAN}/tx/${transactionHash}`;
         case 'Oraichain':
           return `${network.explorer}/txs/${transactionHash}`;
       }
