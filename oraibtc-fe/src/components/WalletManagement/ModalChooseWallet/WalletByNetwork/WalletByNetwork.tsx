@@ -2,7 +2,7 @@ import { WalletType as WalletCosmosType } from '@oraichain/oraidex-common';
 import { Button } from 'components/Button';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import type { WalletNetwork, WalletProvider, WalletType } from 'components/WalletManagement/walletConfig';
-import { getListAddressCosmos, setStorageKey, switchWalletTron } from 'helper';
+import { getListAddressCosmos, setStorageKey } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useTheme from 'hooks/useTheme';
 import useWalletReducer from 'hooks/useWalletReducer';
@@ -11,7 +11,6 @@ import { initClient } from 'libs/utils';
 import { useState } from 'react';
 import { WalletItem } from '../WalletItem';
 import styles from './WalletByNetwork.module.scss';
-import Metamask from 'libs/metamask';
 import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
 import { ChainEnableByNetwork, triggerUnlockOwalletInEvmNetwork } from 'components/WalletManagement/wallet-helper';
 
@@ -22,9 +21,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
   const [currentWalletConnecting, setCurrentWalletConnecting] = useState<WalletNetwork | null>(null);
   const theme = useTheme();
   const [, setOraiAddress] = useConfigReducer('address');
-  const [, setTronAddress] = useConfigReducer('tronAddress');
   const [, setBtcAddress] = useConfigReducer('btcAddress');
-  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
 
@@ -95,7 +92,7 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
       }
     } catch (error) {
       console.log({ errorConnect: error });
-      displayToast(TToastType.METAMASK_FAILED, {
+      displayToast(TToastType.WALLET_FAILED, {
         message: typeof error === 'object' ? error.message : JSON.stringify(error)
       });
     }
@@ -113,12 +110,6 @@ export const WalletByNetwork = ({ walletProvider }: { walletProvider: WalletProv
     switch (networkType) {
       case 'cosmos':
         setOraiAddress(undefined);
-        break;
-      case 'evm':
-        setMetamaskAddress(undefined);
-        break;
-      case 'tron':
-        setTronAddress(undefined);
         break;
       case 'bitcoin':
         setBtcAddress(undefined);

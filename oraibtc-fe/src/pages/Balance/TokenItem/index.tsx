@@ -14,7 +14,6 @@ export interface TokenItemProps {
   className?: string;
   onClick?: Function;
   onBlur?: Function;
-  convertKwt?: any;
   subAmounts?: AmountDetails;
   theme?: string;
   onDepositBtc?: Function;
@@ -29,7 +28,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
   className,
   onClick,
   onClickTransfer,
-  convertKwt,
   subAmounts,
   theme,
   isBtcOfOwallet,
@@ -78,7 +76,6 @@ const TokenItem: React.FC<TokenItemProps> = ({
             subAmounts={subAmounts}
             amountDetail={amountDetail}
             onClickTransfer={onClickTransfer}
-            convertKwt={convertKwt}
           />
         )}
       </div>

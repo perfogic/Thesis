@@ -19,7 +19,7 @@ import Loader from 'components/Loader';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
 import TokenBalance from 'components/TokenBalance';
 import { cosmosTokens, tokenMap, flattenTokens } from 'config/bridgeTokens';
-import { btcChains, evmChains } from 'config/chainInfos';
+import { btcChains } from 'config/chainInfos';
 import copy from 'copy-to-clipboard';
 import { filterChainBridge, getAddressTransfer, networks } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
@@ -36,7 +36,6 @@ import useWalletReducer from 'hooks/useWalletReducer';
 interface TransferConvertProps {
   token: TokenItemType;
   amountDetail?: { amount: string; usd: number };
-  convertKwt?: any;
   onClickTransfer: any;
   subAmounts?: object;
 }
@@ -44,7 +43,6 @@ interface TransferConvertProps {
 const TransferConvertToken: FC<TransferConvertProps> = ({
   token,
   amountDetail,
-  convertKwt,
   onClickTransfer,
   subAmounts
 }) => {
@@ -100,23 +98,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
       if (!isValid) return;
       setTransferLoading(true);
 
-      // if on the same kwt network => we convert between native & erc20 tokens
-      if (token.chainId === 'kawaii_6886-1') {
-        // [KWT, MILKY] from Kawaiiverse => [KWT, MILKY] Oraichain
-        if (toNetworkChainId === 'Oraichain') {
-          return await onClickTransfer(convertAmount, toNetworkChainId);
-        }
-        await convertKwt(convertAmount, token);
-        return;
-      }
-      // [KWT, MILKY] from ORAICHAIN -> KWT_CHAIN || from EVM token -> ORAICHAIN.
-      if (
-        evmChains.find((chain) => chain.chainId === token.chainId) ||
-        (token.chainId === 'Oraichain' && toNetworkChainId === 'kawaii_6886-1')
-      ) {
-        await onClickTransfer(convertAmount, toNetworkChainId);
-        return;
-      }
       return await onClickTransfer(convertAmount, toNetworkChainId);
     } catch (error) {
       console.log({ error });
@@ -367,7 +348,6 @@ const TransferConvertToken: FC<TransferConvertProps> = ({
         {(() => {
           if (
             listedTokens.length > 0 ||
-            evmChains.find((chain) => chain.chainId === token.chainId) ||
             btcChains.find((chain) => chain.chainId !== token.chainId)
           ) {
             return (

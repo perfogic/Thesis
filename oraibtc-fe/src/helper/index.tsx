@@ -10,22 +10,19 @@ import {
   KWT_SCAN,
   MULTIPLIER,
   TRON_SCAN,
-  EVM_CHAIN_ID_COMMON,
   WalletType as WalletCosmosType
 } from '@oraichain/oraidex-common';
 import { network } from 'config/networks';
 import { serializeError } from 'serialize-error';
 
 import { fromBech32, toBech32 } from '@cosmjs/encoding';
-import { bitcoinChainId, leapSnapId } from './constants';
+import { bitcoinChainId } from './constants';
 import { getSnap } from '@leapwallet/cosmos-snap-provider';
 import { Bech32Config } from '@keplr-wallet/types';
 import { CustomChainInfo, EvmDenom, NetworkChainId, TokenItemType } from '@oraichain/oraidex-common';
 import { isMobile } from '@walletconnect/browser-utils';
 import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { WalletType } from 'components/WalletManagement/walletConfig';
 import { chainInfos, chainInfosWithIcon } from 'config/chainInfos';
-import { MetamaskOfflineSigner } from 'libs/eip191';
 import Keplr from 'libs/keplr';
 import { WalletsByNetwork } from 'reducer/wallet';
 
@@ -73,17 +70,6 @@ export const btcNetworksWithIcon = chainInfosWithIcon.filter((c) => c.chainId ==
 export const filterChainBridge = (token: Tokens, item: CustomChainInfo) => {
   const tokenCanBridgeTo = token.bridgeTo ?? ['Oraichain'];
   return tokenCanBridgeTo.includes(item.chainId);
-};
-
-export const getDenomEvm = (): EvmDenom => {
-  switch (Number(window.ethereumDapp?.chainId)) {
-    case Networks.bsc:
-      return 'bep20_orai';
-    case Networks.mainnet:
-      return 'erc20_orai';
-    default:
-      return 'kawaii_orai';
-  }
 };
 
 export const getSpecialCoingecko = (fromCoingecko: string, toCoingecko: string) => {
@@ -170,10 +156,6 @@ export const handleCheckWallet = async () => {
   if (!keplr && walletType !== 'eip191') {
     return displayInstallWallet();
   }
-};
-
-export const checkSnapExist = async (): Promise<boolean> => {
-  return window.ethereum?.isMetaMask && !!(await getSnap());
 };
 
 export const displayInstallWallet = (altWallet = 'Keplr', message?: string, link?: string) => {
@@ -282,12 +264,6 @@ export const owalletCheck = (type: WalletCosmosType) => {
   return type === 'owallet' && walletIsOwallet;
 };
 
-export const isUnlockMetamask = async (): Promise<boolean> => {
-  const ethereum = window.ethereum;
-  if (!ethereum || !ethereum.isMetaMask || !ethereum._metamask) return false;
-  return await window.ethereum._metamask.isUnlocked();
-};
-
 export const isEmptyObject = (value: object) => {
   if (!value) return true;
   if (typeof value === 'object') {
@@ -317,43 +293,10 @@ export interface interfaceRequestTron {
   base58?: string;
 }
 
-export const switchWalletTron = async (walletType: WalletType) => {
-  let tronAddress: string;
-  const res: interfaceRequestTron = await window.tronLinkDapp.request({
-    method: 'tron_requestAccounts'
-  });
-  if (isMobile() || (walletType === 'owallet' && window.tronLinkDapp?.isOwallet)) {
-    tronAddress = res?.base58;
-  } else {
-    const { code, message = 'Tronlink is not ready' } = res;
-    if (code !== 200) throw new Error(message);
-    tronAddress = window.tronWeb?.defaultAddress?.base58;
-  }
-
-  if (!tronAddress) throw new Error(res?.message ?? 'Error get Tron address!');
-
-  return {
-    tronAddress
-  };
-};
-
 export const getAddressTransfer = async (network: CustomChainInfo, walletByNetworks: WalletsByNetwork) => {
   try {
     let address;
-    if (network.networkType === 'evm') {
-      if (network.chainId === EVM_CHAIN_ID_COMMON.TRON_CHAIN_ID) {
-        if (isMobile() && walletByNetworks.tron) {
-          const accountTron: interfaceRequestTron = await window.tronLinkDapp.request({
-            method: 'tron_requestAccounts'
-          });
-          address = accountTron.base58;
-        } else {
-          address = window?.tronWebDapp?.defaultAddress?.base58;
-        }
-      } else if ((walletByNetworks.evm || isMobile()) && window.Metamask.isWindowEthereum()) {
-        address = await window.Metamask.getEthAddress();
-      }
-    } else if (walletByNetworks.cosmos || isMobile()) {
+    if (walletByNetworks.cosmos || isMobile()) {
       address = await window.Keplr.getKeplrAddr(network.chainId);
     }
     return address;
@@ -401,39 +344,6 @@ export const getListAddressCosmos = async (oraiAddr, walletType?: WalletCosmosTy
   return { listAddressCosmos };
 };
 
-export const getChainSupported = async () => {
-  return await window.ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: {
-      snapId: leapSnapId,
-      request: {
-        method: 'getSupportedChains'
-      }
-    }
-  });
-};
-export const getAddressBySnap = async (chainId) => {
-  await window.Keplr.suggestChain(chainId);
-  const rs = await getChainSupported();
-  if (rs?.[chainId]) {
-    const { bech32Address } = await window.ethereum.request({
-      method: 'wallet_invokeSnap',
-      params: {
-        snapId: leapSnapId,
-        request: {
-          method: 'getKey',
-          params: {
-            chainId: chainId
-          }
-        }
-      }
-    });
-    if (!bech32Address) throw Error(`Not get bech32Address by ${chainId}`);
-    return bech32Address;
-  }
-  return null;
-};
-
 type ChainInfoWithoutIcons = Omit<CustomChainInfo, 'currencies' | 'Icon' | 'IconLight' | 'bech32Config'> & {
   currencies: Array<Omit<CustomChainInfo['currencies'][number], 'Icon' | 'IconLight'>>;
   bech32Config: Bech32Config;
@@ -478,23 +388,7 @@ export const chainInfoWithoutIcon = (): ChainInfoWithoutIcons[] => {
     };
   });
 };
-export const getListAddressCosmosByLeapSnap = async () => {
-  let listAddressCosmos = {};
-  const cosmosNetworksFilter = cosmosNetworks.filter(
-    (item, index) => item.chainId !== 'kawaii_6886-1' && item.chainId !== 'injective-1'
-  );
 
-  for (const info of cosmosNetworksFilter) {
-    if (!info) continue;
-    try {
-      const cosmosAddress = await getAddressBySnap(info.chainId);
-      listAddressCosmos[info.chainId] = cosmosAddress;
-    } catch (error) {
-      console.log(`🚀 ~ file: index.tsx:316 ~ getListAddressCosmosByLeapSnap ~ error ${info.chainId}:`, error);
-    }
-  }
-  return { listAddressCosmos };
-};
 export const timeAgo = (timestamp = 0) => {
   if (!timestamp) return 'in 0 day';
   const now = Date.now();
@@ -504,11 +398,4 @@ export const timeAgo = (timestamp = 0) => {
 
   const diffInDays = Math.floor(diffInSeconds / 86400);
   return rtf.format(-diffInDays, 'day');
-};
-
-export const getAddressByEIP191 = async (isSwitchWallet?: boolean) => {
-  const metamaskOfflineSinger = await MetamaskOfflineSigner.connect(window.ethereum);
-  if (!metamaskOfflineSinger) return;
-  const accounts = await metamaskOfflineSinger.getAccounts(isSwitchWallet);
-  return accounts[0].address;
 };

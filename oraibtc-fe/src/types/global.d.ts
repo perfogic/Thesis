@@ -4,8 +4,6 @@ import { Network } from 'bip32';
 import { OraiswapPairTypes } from '@oraichain/oraidex-contracts-sdk';
 import { AbstractProvider } from 'web3-core';
 import Keplr from '../libs/keplr';
-import Metamask from '../libs/metamask';
-import { TronWeb as _TronWeb } from '@oraichain/oraidex-common/build/tronweb';
 import { Networks as _Networks } from 'libs/ethereum-multicall/enums';
 import { DuckDb } from 'libs/duckdb';
 import { Class } from '@oraichain/common-contracts-sdk/build/CwIcs721Bridge.types';
@@ -37,16 +35,6 @@ declare global {
   };
   type BondLpPoolDetails = {
     [key: string]: string;
-  };
-  type MetaMaskEthereumProvider = AbstractProvider & {
-    chainId: string;
-    isMetaMask?: boolean;
-    once(eventName: string | symbol, listener: (...args: any[]) => void): this;
-    on(eventName: string | symbol, listener: (...args: any[]) => void): this;
-    off(eventName: string | symbol, listener: (...args: any[]) => void): this;
-    addListener(eventName: string | symbol, listener: (...args: any[]) => void): this;
-    removeListener(eventName: string | symbol, listener: (...args: any[]) => void): this;
-    removeAllListeners(event?: string | symbol): this;
   };
 
   type ExecuteOptions = {
@@ -119,9 +107,6 @@ declare global {
     Bitcoin: Bitcoin;
     tronWeb: _TronWeb;
     tronLink: TronLink;
-    ethereum: MetaMaskEthereumProvider;
-    ethereumX: MetaMaskEthereumProvider;
-    Metamask: Metamask;
     ReactNativeWebView?: {
       postMessage(msg: string): void;
     };
@@ -133,12 +118,6 @@ declare global {
     queryIfDatasetMinted({ tokenId: string }): Promise<boolean>;
     duckDb: DuckDb;
     TradingView: { version: Function; widget: Class };
-    ethereumDapp: MetaMaskEthereumProvider;
-    tronWebDapp: _TronWeb;
-    tronLinkDapp: TronLink;
-    eth_owallet: MetaMaskEthereumProvider;
-    tronWeb_owallet: _TronWeb;
-    tronLink_owallet: TronLink;
   }
 
   declare const APP_SETTINGS: Record<string, any>;

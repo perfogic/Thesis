@@ -38,10 +38,8 @@ export const MyWallet: React.FC<{
 }> = ({ setIsShowMyWallet, isShowMyWallet, isShowChooseWallet, setIsShowChooseWallet }) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [oraiAddress] = useConfigReducer('address');
-  const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
 
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddresses, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
 

@@ -412,7 +412,6 @@ export const transferIbcCustom = async (
       ? toToken.prefix + transferAddress
       : "";
   let ibcInfo: IBCInfo = ibcInfos[fromToken.chainId][toToken.chainId];
-  // only allow transferring back to ethereum / bsc only if there's metamask address and when the metamask address is used, which is in the ibcMemo variable
   if (
     !transferAddress &&
     (fromToken.evmDenoms || ibcInfo.channel === oraichain2oraib)
@@ -478,44 +477,6 @@ export const findDefaultToToken = (from: TokenItemType) => {
   );
 };
 
-export const convertKwt = async (
-  transferAmount: number,
-  fromToken: TokenItemType
-): Promise<DeliverTxResponse> => {
-  if (transferAmount === 0) throw new Error("Transfer amount is empty");
-  const keplr = await window.Keplr.getKeplr();
-  if (!keplr) return;
-  await window.Keplr.suggestChain(fromToken.chainId);
-  const fromAddress = await window.Keplr.getKeplrAddr(fromToken.chainId);
-
-  if (!fromAddress) {
-    return;
-  }
-
-  const amount = coin(
-    toAmount(transferAmount, fromToken.decimals).toString(),
-    fromToken.denom
-  );
-
-  let result: DeliverTxResponse;
-
-  if (!fromToken.contractAddress) {
-    result = await KawaiiverseJs.convertCoin({
-      sender: fromAddress,
-      gasAmount: { amount: "0", denom: KWT },
-      coin: amount,
-    });
-  } else {
-    result = await KawaiiverseJs.convertERC20({
-      sender: fromAddress,
-      gasAmount: { amount: "0", denom: KWT },
-      amount: amount.amount,
-      contractAddr: fromToken?.contractAddress,
-    });
-  }
-  return result;
-};
-
 export const broadcastConvertTokenTx = async (
   amount: number,
   token: TokenItemType,
@@ -524,8 +485,6 @@ export const broadcastConvertTokenTx = async (
 ): Promise<ExecuteResult> => {
   const _fromAmount = toAmount(amount, token.decimals).toString();
   const oraiAddress = await window.Keplr.getKeplrAddr();
-  if (!oraiAddress)
-    throw generateError("Please login both metamask and Keplr!");
   let msg: ExecuteInstruction;
   if (type === "nativeToCw20") {
     msg = generateConvertMsgs({

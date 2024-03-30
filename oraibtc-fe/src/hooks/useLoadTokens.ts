@@ -25,9 +25,7 @@ import { bitcoinChainId } from 'helper/constants';
 
 export type LoadTokenParams = {
   refresh?: boolean;
-  metamaskAddress?: string;
   oraiAddress?: string;
-  tronAddress?: string;
   btcAddress?: string;
 };
 
@@ -59,7 +57,7 @@ async function loadNativeBalance(dispatch: Dispatch, address: string, tokenInfo:
 const timer = {};
 async function loadTokens(
   dispatch: Dispatch,
-  { oraiAddress, metamaskAddress, tronAddress, btcAddress }: LoadTokenParams
+  { oraiAddress, btcAddress }: LoadTokenParams
 ) {
   try {
     if (oraiAddress) {

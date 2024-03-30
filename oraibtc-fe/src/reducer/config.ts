@@ -20,14 +20,11 @@ export type RewardPoolType = {
 
 export interface ConfigState {
   address: string;
-  metamaskAddress: string | null;
-  tronAddress: string | null;
   btcAddress: string | null;
   cosmosAddress: { [key: string]: string };
   allPendingDeposits: { [key: string]: DepositInfo[] };
   chainId: string;
   chainInfo: ChainInfoType;
-  infoEvm: ChainInfoType;
   filterNetwork: string;
   walletTypeStore: string;
   infoCosmos: ChainInfoType;
@@ -36,33 +33,24 @@ export interface ConfigState {
   hideOraichainSmallAmount: boolean;
   theme: Themes;
   coingecko: CoinGeckoPrices<string>;
-  apr: {
-    [key: string]: number;
-  };
-  rewardPools: RewardPoolType[];
   persistVersion: number;
 }
 
 const initialState: ConfigState = {
   address: '',
-  metamaskAddress: '',
   btcAddress: '',
-  tronAddress: '',
   walletTypeStore: 'owallet',
   cosmosAddress: {},
   allPendingDeposits: {},
   chainId: 'Oraichain',
   filterNetwork: 'Oraichain',
   chainInfo: {},
-  infoEvm: {},
   infoCosmos: {},
   statusChangeAccount: false,
   hideOtherSmallAmount: false,
   hideOraichainSmallAmount: false,
   theme: 'dark',
   coingecko: {},
-  apr: {},
-  rewardPools: [],
   persistVersion: PERSIST_VER
 };
 

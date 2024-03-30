@@ -7,13 +7,11 @@ import { isMobile } from '@walletconnect/browser-utils';
 import { TToastType, displayToast } from 'components/Toasts/Toast';
 import { network } from 'config/networks';
 import { ThemeProvider } from 'context/theme-context';
-import { getListAddressCosmos, getNetworkGasPrice, interfaceRequestTron } from 'helper';
-import { leapWalletType } from 'helper/constants';
+import { getListAddressCosmos, getNetworkGasPrice } from 'helper';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import useWalletReducer from 'hooks/useWalletReducer';
 import Keplr from 'libs/keplr';
-import Metamask from 'libs/metamask';
 import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
 import { useEffect, useState } from 'react';
 import useWebSocket from 'react-use-websocket';
@@ -27,8 +25,6 @@ import Sidebar from './Sidebar';
 
 const App = () => {
   const [address, setOraiAddress] = useConfigReducer('address');
-  const [, setTronAddress] = useConfigReducer('tronAddress');
-  const [, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [walletTypeStore] = useConfigReducer('walletTypeStore');
   const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
@@ -38,20 +34,7 @@ const App = () => {
   const [walletByNetworks] = useWalletReducer('walletsByNetwork');
   const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
   const mobileMode = isMobile();
-  const ethOwallet = window.eth_owallet;
   // useTronEventListener();
-
-  // TODO: polyfill evm, tron, need refactor
-  useEffect(() => {
-    if (walletByNetworks.tron === 'owallet') {
-      window.tronWebDapp = window.tronWeb_owallet;
-      window.tronLinkDapp = window.tronLink_owallet;
-      window.Metamask = new Metamask(window.tronWebDapp);
-    }
-    if (walletByNetworks.evm === 'owallet' && ethOwallet) {
-      window.ethereumDapp = ethOwallet;
-    }
-  }, [walletByNetworks, ethOwallet]);
 
   //Public API that will echo messages sent to it back to the client
   const { sendJsonMessage, lastJsonMessage } = useWebSocket(
@@ -97,7 +80,6 @@ const App = () => {
       displayToast(TToastType.TX_INFO, {
         message: `You have received ${tokenDisplay}`
       });
-      // no metamaskAddress, only reload cosmos
       loadTokenAmounts({ oraiAddress: address });
     }
   }, [lastJsonMessage]);
@@ -127,7 +109,7 @@ const App = () => {
 
   useEffect(() => {
     (async () => {
-      if (![leapWalletType, 'eip191'].includes(walletTypeStore) || isMobile()) {
+      if (isMobile()) {
         window.addEventListener('keplr_keystorechange', keplrHandler);
       }
     })();
@@ -152,14 +134,10 @@ const App = () => {
 
   const keplrHandler = async () => {
     try {
-      let metamaskAddress, oraiAddress, tronAddress, btcAddress;
+      let oraiAddress, btcAddress;
 
       if (mobileMode) {
-        window.tronWebDapp = window.tronWeb;
-        window.tronLinkDapp = window.tronLink;
-        window.ethereumDapp = window.ethereum;
         window.Keplr = new Keplr('owallet');
-        window.Metamask = new Metamask(window.tronWebDapp);
       }
 
       if (walletByNetworks.cosmos || mobileMode) {
@@ -171,27 +149,13 @@ const App = () => {
         }
       }
 
-      if (walletByNetworks.evm === 'owallet' || mobileMode) {
-        if (mobileMode) await window.Metamask.switchNetwork(Networks.bsc);
-        metamaskAddress = await window.Metamask.getEthAddress();
-        if (metamaskAddress) setMetamaskAddress(metamaskAddress);
-      }
       if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
         btcAddress = await window.Bitcoin.getAddress();
         if (btcAddress) setBtcAddress(btcAddress);
       }
-      if (walletByNetworks.tron === 'owallet' || mobileMode) {
-        const res: interfaceRequestTron = await window.tronLinkDapp.request({
-          method: 'tron_requestAccounts'
-        });
-        tronAddress = res?.base58;
-        if (tronAddress) setTronAddress(tronAddress);
-      }
 
       loadTokenAmounts({
         oraiAddress,
-        metamaskAddress,
-        tronAddress,
         btcAddress
       });
     } catch (error) {

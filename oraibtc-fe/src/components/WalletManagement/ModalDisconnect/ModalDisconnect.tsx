@@ -20,9 +20,7 @@ export const ModalDisconnect: React.FC<{
   const [theme] = useConfigReducer('theme');
   const [walletByNetworks, setWalletByNetworks] = useWalletReducer('walletsByNetwork');
   const [oraiAddress, setOraiAddress] = useConfigReducer('address');
-  const [tronAddress, setTronAddress] = useConfigReducer('tronAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
-  const [metamaskAddress, setMetamaskAddress] = useConfigReducer('metamaskAddress');
   const { isCopied, copiedValue, handleCopy } = useCopyClipboard();
 
   const chains =
@@ -40,12 +38,6 @@ export const ModalDisconnect: React.FC<{
         break;
       case 'bitcoin':
         choosedAddressDisplayByNetwork = btcAddress;
-        break;
-      case 'evm':
-        choosedAddressDisplayByNetwork = metamaskAddress;
-        break;
-      case 'tron':
-        choosedAddressDisplayByNetwork = tronAddress;
         break;
       default:
         break;
@@ -66,14 +58,8 @@ export const ModalDisconnect: React.FC<{
           localStorage.removeItem('eip191-account');
         }
         break;
-      case 'evm':
-        setMetamaskAddress(undefined);
-        break;
       case 'bitcoin':
         setBtcAddress(undefined);
-        break;
-      case 'tron':
-        setTronAddress(undefined);
         break;
       default:
         break;

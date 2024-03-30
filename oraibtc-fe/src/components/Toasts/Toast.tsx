@@ -30,8 +30,6 @@ export enum TToastType {
   TX_FAILED,
   TX_INFO,
   KEPLR_FAILED,
-  METAMASK_FAILED,
-  TRONLINK_FAILED,
   WALLET_FAILED
 }
 
@@ -65,16 +63,6 @@ export type DisplayToastFn = ((
   ) => void) &
   ((
     type: TToastType.KEPLR_FAILED,
-    extraData?: Partial<Pick<IToastExtra, 'message'>>,
-    options?: Partial<ToastOptions>
-  ) => void) &
-  ((
-    type: TToastType.METAMASK_FAILED,
-    extraData?: Partial<Pick<IToastExtra, 'message'>>,
-    options?: Partial<ToastOptions>
-  ) => void) &
-  ((
-    type: TToastType.TRONLINK_FAILED,
     extraData?: Partial<Pick<IToastExtra, 'message'>>,
     options?: Partial<ToastOptions>
   ) => void) &
@@ -137,10 +125,6 @@ export const displayToast: DisplayToastFn = (
       return toast(<ToastTxFailed message={inputExtraData.message} />, inputOptions);
     case TToastType.KEPLR_FAILED:
       return toast(<ToastKeplrFailed message={inputExtraData.message} />, inputOptions);
-    case TToastType.METAMASK_FAILED:
-      return toast(<ToastMetamaskFailed message={inputExtraData.message} />, inputOptions);
-    case TToastType.TRONLINK_FAILED:
-      return toast(<ToastTronLinkFailed message={inputExtraData.message} />, inputOptions);
     case TToastType.WALLET_FAILED:
       return toast(<ToastWalletFailed message={inputExtraData.message} />, inputOptions);
     default:
@@ -191,26 +175,6 @@ const ToastKeplrFailed: FunctionComponent<{ message: string }> = ({ message }) =
     <FailedIcon />
     <section className={styles.toast_section}>
       <h6>Keplr failed</h6>
-      <p>{message}</p>
-    </section>
-  </div>
-);
-
-const ToastMetamaskFailed: FunctionComponent<{ message: string }> = ({ message }) => (
-  <div className={styles.toast_content}>
-    <FailedIcon />
-    <section className={styles.toast_section}>
-      <h6>Metamask failed</h6>
-      <p>{message}</p>
-    </section>
-  </div>
-);
-
-const ToastTronLinkFailed: FunctionComponent<{ message: string }> = ({ message }) => (
-  <div className={styles.toast_content}>
-    <FailedIcon />
-    <section className={styles.toast_section}>
-      <h6>Tronlink failed</h6>
       <p>{message}</p>
     </section>
   </div>

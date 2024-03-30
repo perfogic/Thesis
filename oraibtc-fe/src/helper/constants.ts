@@ -1,6 +1,3 @@
-export const leapSnapId = 'npm:@leapwallet/metamask-cosmos-snap';
-export const leapWalletType = 'leapSnap';
-
 export const btcNetwork: any = 'bitcoin';
 // TODO: hardcode switch bitcoinTestnet and bitcoin
 export const bitcoinChainId: any = 'bitcoin';

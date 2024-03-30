@@ -5,7 +5,6 @@ import _BigInt from 'big-integer';
 import { chainInfos } from 'config/chainInfos';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
 import Keplr from 'libs/keplr';
-import Metamask from 'libs/metamask';
 
 import Bitcoin from 'libs/bitcoin';
 
@@ -31,7 +30,6 @@ window.Keplr = new Keplr(walletType);
 
 window.ethereumDapp = window.ethereum;
 window.Bitcoin = new Bitcoin();
-window.Metamask = new Metamask(window.tronWeb);
 
 window.React = require('react');
 window.Buffer = require('buffer').Buffer;

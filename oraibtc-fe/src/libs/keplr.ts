@@ -6,14 +6,12 @@ import { displayToast, TToastType } from 'components/Toasts/Toast';
 import { cosmosTokens } from 'config/bridgeTokens';
 import { OraiBTCBridgeNetwork, chainInfos } from 'config/chainInfos';
 import { network } from 'config/networks';
-import { getAddress, getAddressByEIP191 } from 'helper';
-import { EIP_EIP_STORAGE_KEY_ACC, MetamaskOfflineSigner } from './eip191';
+import { getAddress } from 'helper';
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
     const keplr = await this.getKeplr();
     if (keplr) return await keplr.getOfflineSignerAuto(chainId);
-    if (window.ethereum) return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
     throw new Error('You have to install Cosmos wallet first if you do not use a mnemonic to sign transactions');
   }
 
@@ -126,19 +124,6 @@ export default class Keplr extends CosmosWallet {
     // not support network.chainId (Oraichain)
     chainId = chainId ?? network.chainId;
     try {
-      if (this.typeWallet === ('eip191' as any)) {
-        // TODO: cache if type wallet is eip191 ( metamask cosmos )
-
-        // use for universal swap from oraichain to EVM
-        if (chainId === 'oraibridge-subnet-2') {
-          const result = localStorage.getItem(EIP_EIP_STORAGE_KEY_ACC);
-          const parsedResult = JSON.parse(result);
-          const oraiAddress = parsedResult ? parsedResult.accounts[0].address : null;
-          return getAddress(oraiAddress, 'oraib');
-        }
-        return getAddressByEIP191();
-      }
-
       const isEnableKeplr = await this.getKeplr();
       if (isEnableKeplr && ['keplr', 'owallet'].includes(this.typeWallet)) {
         if (!this.keplr) throw new Error('Error: get window cosmos!');

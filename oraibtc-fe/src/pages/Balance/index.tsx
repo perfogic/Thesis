@@ -2,23 +2,15 @@ import { DeliverTxResponse, isDeliverTxFailure } from '@cosmjs/stargate';
 import {
   KWT_SCAN,
   NetworkChainId,
-  ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX,
   TokenItemType,
-  findToTokenOnOraiBridge,
   toAmount,
-  tronToEthAddress,
   CosmosChainId,
-  INJECTIVE_ORAICHAIN_DENOM,
-  INJECTIVE_CONTRACT,
   flattenTokens,
   getTokenOnOraichain,
-  toDisplay
 } from '@oraichain/oraidex-common';
 import {
   UniversalSwapHandler,
   isSupportedNoPoolSwapEvm,
-  addOraiBridgeRoute,
-  handleSimulateSwap
 } from '@oraichain/oraidex-universal-swap';
 import { ReactComponent as ArrowDownIcon } from 'assets/icons/arrow.svg';
 import { ReactComponent as ArrowDownIconLight } from 'assets/icons/arrow_light.svg';
@@ -36,7 +28,6 @@ import {
   handleCheckWallet,
   handleErrorTransaction,
   networks,
-  EVM_CHAIN_ID,
   handleCheckAddress,
   getSpecialCoingecko
 } from 'helper';
@@ -44,8 +35,7 @@ import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useLoadTokens from 'hooks/useLoadTokens';
 import Content from 'layouts/Content';
-import Metamask from 'libs/metamask';
-import { generateError, getTotalUsd, getUsd, initEthereum, toSumDisplay, toTotalDisplay } from 'libs/utils';
+import { generateError, getTotalUsd, getUsd, toSumDisplay, toTotalDisplay } from 'libs/utils';
 import isEqual from 'lodash/isEqual';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -56,7 +46,6 @@ import styles from './Balance.module.scss';
 import TokenItem, { TokenItemProps } from './TokenItem';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import {
-  convertKwt,
   convertTransferIBCErc20Kwt,
   findDefaultToToken,
   getUtxos,
@@ -103,9 +92,7 @@ const Balance: React.FC<BalanceProps> = () => {
   const [theme] = useConfigReducer('theme');
   const [oraiAddress] = useConfigReducer('address');
   const [hideOtherSmallAmount, setHideOtherSmallAmount] = useConfigReducer('hideOtherSmallAmount');
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [filterNetworkUI, setFilterNetworkUI] = useConfigReducer('filterNetwork');
-  const [tronAddress] = useConfigReducer('tronAddress');
   const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
   const [addressRecovery, setAddressRecovery] = useState('');
 
@@ -140,12 +127,6 @@ const Balance: React.FC<BalanceProps> = () => {
     const _tokenUrl = tokenUrl.toUpperCase();
     setTokens(tokens.map((childTokens) => childTokens.filter((t) => t.name.includes(_tokenUrl))));
   }, [tokenUrl]);
-
-  useEffect(() => {
-    initEthereum().catch((error) => {
-      console.log(error);
-    });
-  }, []);
 
   useEffect(() => {
     setTokenBridge([undefined, undefined]);
@@ -219,7 +200,7 @@ const Balance: React.FC<BalanceProps> = () => {
     try {
       if (loadingRefresh) return;
       setLoadingRefresh(true);
-      await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress });
+      await loadTokenAmounts({ oraiAddress, btcAddress });
     } catch (err) {
       console.log({ err });
     } finally {
@@ -227,16 +208,6 @@ const Balance: React.FC<BalanceProps> = () => {
         setLoadingRefresh(false);
       }, 2000);
     }
-  };
-
-  const handleTransferIBC = async (fromToken: TokenItemType, toToken: TokenItemType, transferAmount: number) => {
-    let transferAddress = metamaskAddress;
-    // check tron network and convert address
-    if (toToken.prefix === ORAI_BRIDGE_EVM_TRON_DENOM_PREFIX) {
-      transferAddress = tronToEthAddress(tronAddress);
-    }
-    const result = await transferIbcCustom(fromToken, toToken, transferAmount, amounts, transferAddress);
-    processTxResult(fromToken.rpc, result);
   };
 
   const handleTransferBTCToOraichain = async (fromToken: TokenItemType, transferAmount: number, btcAddr: string) => {
@@ -297,7 +268,7 @@ const Balance: React.FC<BalanceProps> = () => {
           customLink: `/bitcoin-dashboard?tab=pending_deposits`
         });
         setTimeout(async () => {
-          await loadTokenAmounts({ metamaskAddress, tronAddress, oraiAddress, btcAddress: btcAddr });
+          await loadTokenAmounts({ oraiAddress, btcAddress: btcAddr });
         }, 5000);
         return;
       }
@@ -441,25 +412,10 @@ const Balance: React.FC<BalanceProps> = () => {
       if (newToToken.coinGeckoId !== from.coinGeckoId)
         throw generateError(`From token ${from.coinGeckoId} is different from to token ${newToToken.coinGeckoId}`);
 
-      // TODO: hardcode case Neutaro-1 & Noble-1
-      if (from.chainId === 'Neutaro-1') return await handleTransferIBC(from, newToToken, fromAmount);
       // remaining tokens, we override from & to of onClickTransfer on index.tsx of Balance based on the user's token destination choice
       // to is Oraibridge tokens
       // or other token that have same coingeckoId that show in at least 2 chain.
       const cosmosAddress = await handleCheckAddress(from.cosmosBased ? (from.chainId as CosmosChainId) : 'Oraichain');
-
-      const isFromEvmNotTron = from.chainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(from.chainId);
-      const isToNetworkEvmNotTron = toNetworkChainId !== '0x2b6653dc' && EVM_CHAIN_ID.includes(toNetworkChainId);
-      // switch network for metamask, exclude TRON
-      if (isFromEvmNotTron) {
-        await window.Metamask.switchNetwork(from.chainId);
-      }
-
-      let latestEvmAddress = metamaskAddress;
-      // TODO: need to get latest tron address if cached
-      if (isFromEvmNotTron || isToNetworkEvmNotTron) {
-        latestEvmAddress = await window.Metamask.getEthAddress();
-      }
 
       let amountsBalance = amounts;
       let simulateAmount = toAmount(fromAmount).toString();
@@ -494,14 +450,14 @@ const Balance: React.FC<BalanceProps> = () => {
 
       const universalSwapHandler = new UniversalSwapHandler(
         {
-          sender: { cosmos: cosmosAddress, evm: latestEvmAddress, tron: tronAddress },
+          sender: { cosmos: cosmosAddress },
           originalFromToken: from,
           originalToToken: newToToken,
           fromAmount,
           amounts: amountsBalance,
           simulateAmount
         },
-        { cosmosWallet: window.Keplr, evmWallet: new Metamask(window.tronWebDapp) }
+        { cosmosWallet: window.Keplr }
       );
 
       result = await universalSwapHandler.processUniversalSwap();
@@ -644,16 +600,6 @@ const Balance: React.FC<BalanceProps> = () => {
                       }}
                       onClickTransfer={async (fromAmount: number, filterNetwork?: NetworkChainId) => {
                         await onClickTransfer(fromAmount, from, to, filterNetwork);
-                      }}
-                      convertKwt={async (transferAmount: number, fromToken: TokenItemType) => {
-                        try {
-                          const result = await convertKwt(transferAmount, fromToken);
-                          processTxResult(from.rpc, result, getTransactionUrl(from.chainId, result.transactionHash));
-                        } catch (ex) {
-                          displayToast(TToastType.TX_FAILED, {
-                            message: ex.message
-                          });
-                        }
                       }}
                     />
                   </div>

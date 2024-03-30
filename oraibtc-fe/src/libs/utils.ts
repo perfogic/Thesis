@@ -196,24 +196,6 @@ export const generateError = (message: string) => {
     return {ex: {message}};
 };
 
-export const initEthereum = async () => {
-    // support only https
-    if (isMobile() && !window.ethereumDapp && window.location.protocol === 'https:') {
-        const bscChain = chainInfos.find((c) => c.chainId === '0x38');
-        const provider = new WalletConnectProvider({
-            chainId: Networks.bsc,
-            storageId: 'metamask',
-            qrcode: true,
-            rpc: {[Networks.bsc]: bscChain.rpc},
-            qrcodeModalOptions: {
-                mobileLinks: ['metamask']
-            }
-        });
-        await provider.enable();
-        (window.ethereumDapp as any) = provider;
-    }
-};
-
 export const initClient = async () => {
     try {
         // suggest our chain

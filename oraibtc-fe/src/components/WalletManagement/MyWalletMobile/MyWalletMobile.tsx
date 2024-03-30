@@ -8,7 +8,7 @@ import ToggleSwitch from 'components/ToggleSwitch';
 import { type NetworkType } from 'components/WalletManagement/walletConfig';
 import { ThemeContext } from 'context/theme-context';
 import copy from 'copy-to-clipboard';
-import { btcNetworksWithIcon, cosmosNetworksWithIcon, evmNetworksIconWithoutTron, tronNetworksWithIcon } from 'helper';
+import { btcNetworksWithIcon, cosmosNetworksWithIcon } from 'helper';
 import { useCoinGeckoPrices } from 'hooks/useCoingecko';
 import useConfigReducer from 'hooks/useConfigReducer';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -28,8 +28,6 @@ export const MyWalletMobile: React.FC<{
 }> = ({ setIsShowMyWallet, isShowMyWallet, isShowChooseWallet, setIsShowChooseWallet }) => {
   const { theme, setTheme } = useContext(ThemeContext);
   const [oraiAddress] = useConfigReducer('address');
-  const [tronAddress] = useConfigReducer('tronAddress');
-  const [metamaskAddress] = useConfigReducer('metamaskAddress');
   const [cosmosAddresses] = useConfigReducer('cosmosAddress');
   const [btcAddress] = useConfigReducer('btcAddress');
 
@@ -110,81 +108,6 @@ export const MyWalletMobile: React.FC<{
     );
   };
 
-  const renderEvmAddresses = () => {
-    if (!metamaskAddress) return <></>;
-    return (
-      <div className={styles.addressByNetworkItem}>
-        {evmNetworksIconWithoutTron.map((network, index) => {
-          const chainAddress = metamaskAddress;
-          return (
-            <div className={styles.addressByChainInNetwork} key={network.chainId}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    {theme === 'light' ? (
-                      <network.IconLight width={30} height={30} />
-                    ) : (
-                      <network.Icon width={30} height={30} />
-                    )}
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>{network.chainName}</div>
-                  <div className={styles.chainAddress}>
-                    <span>{reduceString(chainAddress, 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => copyWalletAddress(e, chainAddress)}>
-                      {copiedValue === chainAddress ? (
-                        <SuccessIcon width={15} height={15} />
-                      ) : (
-                        <CopyIcon width={15} height={15} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderTronAddresses = () => {
-    if (!tronAddress) return <></>;
-
-    return (
-      <div className={styles.addressByNetworkItem}>
-        {tronNetworksWithIcon.map((network) => {
-          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
-          if (!NetworkIcon) NetworkIcon = DefaultIcon;
-          return (
-            <div key={network.chainId} className={styles.addressByChainInNetwork}>
-              <div className={styles.left}>
-                <div className={styles.icon}>
-                  <div className={styles.iconChain}>
-                    <NetworkIcon width={30} height={30} />
-                  </div>
-                </div>
-                <div className={styles.info}>
-                  <div className={styles.chainName}>{network.chainName}</div>
-                  <div className={styles.chainAddress}>
-                    <span>{reduceString(tronAddress, 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => copyWalletAddress(e, tronAddress)}>
-                      {copiedValue === tronAddress ? (
-                        <SuccessIcon width={15} height={15} />
-                      ) : (
-                        <CopyIcon width={15} height={15} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
   const renderBtcAddresses = () => {
     if (!btcAddress) return <></>;
 
@@ -272,8 +195,6 @@ export const MyWalletMobile: React.FC<{
         </div>
         <div className={styles.listAddressByNetwork}>
           {renderCosmosAddresses()}
-          {renderEvmAddresses()}
-          {renderTronAddresses()}
           {renderBtcAddresses()}
         </div>
       </div>

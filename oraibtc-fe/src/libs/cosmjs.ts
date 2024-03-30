@@ -5,14 +5,12 @@ import { Coin, GasPrice } from '@cosmjs/stargate';
 import { Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { Stargate } from '@injectivelabs/sdk-ts';
 import { network } from 'config/networks';
-import { MetamaskOfflineSigner } from './eip191';
 import { getWalletByNetworkCosmosFromStorage } from 'helper';
 export type clientType = 'cosmwasm' | 'injective';
 
 const collectWallet = async (chainId: string) => {
   const keplr = await window.Keplr.getKeplr();
   if (keplr) return await keplr.getOfflineSignerAuto(chainId);
-  if (window.ethereum) return await MetamaskOfflineSigner.connect(window.ethereum, network.denom);
   throw new Error('You have to install Cosmos wallet first if you do not use a mnemonic to sign transactions');
 };
 
