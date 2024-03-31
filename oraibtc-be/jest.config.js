@@ -1,17 +1,7 @@
-const config = {
-  preset: "ts-jest",
-  testEnvironment: "node",
-  testEnvironmentOptions: {
-    NODE_ENV: "test",
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+module.exports = {
+  transform: {
+    "^.+\\.ts?$": ["ts-jest", { isolatedModules: true }],
   },
-  restoreMocks: true,
-  coveragePathIgnorePatterns: [
-    "node_modules",
-    "src/config",
-    "src/index.js",
-    "tests",
-  ],
-  coverageReporters: ["text", "lcov", "clover", "html"],
+  testEnvironment: "node",
 };
-
-module.exports = config;

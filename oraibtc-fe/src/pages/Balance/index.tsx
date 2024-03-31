@@ -51,7 +51,6 @@ import {
   getUtxos,
   mapUtxos,
   transferIBCKwt,
-  transferIbcCustom,
   getFeeRate,
   calculatorTotalFeeBtc,
 } from './helpers';
@@ -373,15 +372,6 @@ const Balance: React.FC<BalanceProps> = () => {
     displayToast(TToastType.TX_BROADCASTING);
     try {
       let result: DeliverTxResponse | string | any;
-
-      // [(ERC20)KWT, (ERC20)MILKY] ==> ORAICHAIN
-      if (from.chainId === 'kawaii_6886-1' && to.chainId === 'Oraichain') {
-        // convert erc20 to native ==> ORAICHAIN
-        if (from.contractAddress) result = await convertTransferIBCErc20Kwt(from, to, fromAmount);
-        else result = await transferIBCKwt(from, to, fromAmount, amounts);
-        processTxResult(from.rpc, result, `${KWT_SCAN}/tx/${result.transactionHash}`);
-        return;
-      }
 
       // TODO: hardcode check bitcoinTestnet need update later
       // [BTC Native] <==> ORAICHAIN

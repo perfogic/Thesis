@@ -2,39 +2,42 @@ import Joi from "joi";
 import "dotenv/config";
 
 const envVarsSchema = Joi.object()
-	.keys({
-		NODE_ENV: Joi.string()
-			.valid("production", "development", "test")
-			.required(),
-		PORT: Joi.number().default(8000),
-	})
-	.unknown();
+  .keys({
+    NODE_ENV: Joi.string()
+      .valid("production", "development", "test")
+      .required(),
+    PORT: Joi.number().default(8000),
+    REDIS_HOST: Joi.string().required().description("Redis Host"),
+    REDIS_PORT: Joi.string().required().description("Redis Port"),
+    REDIS_PASSWORD: Joi.string().required().description("Redis Password"),
+    RELAYER_URL: Joi.string().required().description("Relayer Url"),
+    LCD_URL: Joi.string().required().description("Lcd Url"),
+    POLLING_INTERVAL: Joi.number().required().description("Polling Interval"),
+  })
+  .unknown();
 
 const { value: envVars, error } = envVarsSchema
-	.prefs({ errors: { label: "key" } })
-	.validate(process.env);
+  .prefs({ errors: { label: "key" } })
+  .validate(process.env);
 
 if (error) {
-	throw new Error(`Config validation error: ${error.message}`);
+  throw new Error(`Config validation error: ${error.message}`);
 }
 
 export default {
-	env: envVars.NODE_ENV,
-	port: envVars.PORT,
-	mongoUrl: envVars.MONGO_URL,
-	chain: envVars.CHAIN,
-	jwt: envVars.JWT,
-	redis: {
-		host: envVars.REDIS_HOST,
-		port: envVars.REDIS_PORT,
-		password: envVars.REDIS_PASSWORD,
-	},
-	sui: {
-		mnemonic: envVars.SUI_MNEMONIC,
-		address: envVars.SUI_ADDRESS,
-		privateKey: envVars.SUI_PRIVATE_KEY,
-	},
-	twitter: {
-		bearer: envVars.BEARER_TOKEN,
-	},
+  env: envVars.NODE_ENV,
+  port: envVars.PORT,
+  redis: {
+    host: envVars.REDIS_HOST,
+    port: envVars.REDIS_PORT,
+    password: envVars.REDIS_PASSWORD,
+  },
+  oraibtc: {
+    relayer: envVars.RELAYER_URL,
+    lcd: envVars.LCD_URL,
+  },
+  checkpoint: {
+    pollingInterval: envVars.POLLING_INTERVAL,
+    firstCheckpointIndex: envVars.FIRST_CHECKPOINT_INDEX,
+  },
 };

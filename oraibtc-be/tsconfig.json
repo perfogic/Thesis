@@ -3,8 +3,6 @@
   "compilerOptions": {
     "target": "es2017",
     "lib": ["es2017", "esnext.asynciterable"],
-    "typeRoots": ["node_modules/@types", "src/shared/@typess"],
-    // "types": ["@types/jest"],
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -20,21 +18,16 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "importHelpers": true,
-    "baseUrl": "./src",
-    "paths": {
-      "@env": ["env"],
-      "@lib/*": ["common/lib/*"],
-      "@components/*": ["components/*"],
-      "@shared/*": ["shared/*"]
-    }
+    "baseUrl": "src"
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.json",
+    "src/@types/*.ts",
     "src/tests/*.test.ts",
     "src/tests/**/*.test.ts"
   ],
-  "exclude": ["node_modules", "src/logs", "src/tests"],
+  "exclude": ["node_modules", "tests"],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
   }

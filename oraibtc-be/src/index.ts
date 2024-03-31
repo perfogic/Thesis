@@ -5,9 +5,12 @@ import express, { NextFunction, Request, Response } from "express";
 import xss from "xss-clean";
 import helmet from "helmet";
 import http from "http";
+import { resolve } from "path";
 import compression from "compression";
-import morgan from "configs/morgan";
-import env from "configs/env";
+import morgan from "./configs/morgan";
+import env from "./configs/env";
+import { DuckDbNode } from "./services/db";
+import { CheckpointPolling } from "./services/checkpoint";
 const app = express();
 const server = http.createServer(app);
 
@@ -17,9 +20,7 @@ app.use(morgan.errorHandler);
 app.use(helmet());
 app.use(
   cors({
-    origin: [
-      "*"
-    ],
+    origin: ["*"],
     credentials: true,
     exposedHeaders: ["set-cookie"],
   })
@@ -45,7 +46,7 @@ const PORT = env.port || 8000;
  * There are 3 main routes here:
  * /api/pending_withdraws/${bitcoin_address}
  * /api/pending_deposits/${orai_address}
- * /api/checkpoints/${checkpoint_index} 
+ * /api/checkpoints/${checkpoint_index}
  * /api/value_locked/charts?type=${day,week,month} // we should cache here, after each time polling
  * /api/fee_rate/charts?type=${day,week,month} // we should cache here, after each time polling
  * /api/checkpoint/config // this one we only should cache 3 days
@@ -54,7 +55,7 @@ const PORT = env.port || 8000;
 
 /**
  * There is only one table instead
- * Checkpoint:  
+ * Checkpoint:
  *  checkpoint_index: number primary key
  *  fee_rate: number
  *  fee_collected: number
@@ -62,9 +63,12 @@ const PORT = env.port || 8000;
  *  sigset: string
  *  transactions: string
  *  status: string (COMPLETE, SIGNING, BUILDING)
- *  create_time: number 
+ *  create_time: number
  */
 
 server.listen(PORT, async () => {
   console.log("NODE IS RUNNING ON PORT " + PORT);
+  await DuckDbNode.create(resolve(__dirname, "../src/storages/db.duckdb"));
+  await DuckDbNode.instances.createTable();
+  await CheckpointPolling.polling();
 });
