@@ -3,6 +3,7 @@ import { getCheckpointData, getCheckpointQueue } from "../utils/lcd";
 import { TableName } from "../utils/db";
 import env from "../configs/env";
 import { CheckpointStatus } from "../@types";
+import logger from "../configs/logger";
 
 export class CheckpointPolling {
   static index: number = -1;
@@ -30,7 +31,7 @@ export class CheckpointPolling {
       return;
     }
 
-    this.index = latestCheckpoints[0].checkpointIndex;
+    this.index = latestCheckpoints[0].checkpointIndex + 1;
   }
 
   // Do polling each time
@@ -38,13 +39,7 @@ export class CheckpointPolling {
     while (true) {
       try {
         await this._initialize();
-        if (this.index > this.latestIndex) {
-          console.log(
-            `Running at latest checkpoint ${this.index}, no need to crawling`
-          );
-          return;
-        }
-        console.log(
+        logger.info(
           `Crawling checkpoint index: ${this.index}/${this.latestIndex}`
         );
         // first index is checkpoint on bridge
@@ -67,7 +62,7 @@ export class CheckpointPolling {
             TableName.Checkpoint
           );
         } else {
-          console.log(`Skipping handle checkpoint ${this.index}`);
+          logger.info(`Skipping handle checkpoint ${this.index}`);
         }
 
         if (this.index < this.latestIndex) {
@@ -75,6 +70,7 @@ export class CheckpointPolling {
         }
       } catch (err) {
         console.log(err);
+        logger.error(err?.message || "Something went wrong");
       }
 
       await new Promise((resolve) =>

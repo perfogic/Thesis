@@ -43,14 +43,9 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 const PORT = env.port || 8000;
 
 /**
- * There are 3 main routes here:
- * /api/pending_withdraws/${bitcoin_address}
- * /api/pending_deposits/${orai_address}
- * /api/checkpoints/${checkpoint_index}
+ * There are 2 main routes here:
  * /api/value_locked/charts?type=${day,week,month} // we should cache here, after each time polling
  * /api/fee_rate/charts?type=${day,week,month} // we should cache here, after each time polling
- * /api/checkpoint/config // this one we only should cache 3 days
- * /api/bitcoin/config // this one we only should cache 3 days
  */
 
 /**
