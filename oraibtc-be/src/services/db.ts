@@ -105,8 +105,7 @@ export class DuckDbNode extends DuckDB {
 
   // TODO: use typescript here instead of any
   async insertCheckpoint(data: CheckpointDataInterface, tableName: string) {
-    const sql =
-      "INSERT INTO Checkpoint (checkpointIndex, sigset, feeRate, feeCollected, signedAtBtcHeight, transaction, status, createTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    const sql = `INSERT INTO ${tableName} (checkpointIndex, sigset, feeRate, feeCollected, signedAtBtcHeight, transaction, status, createTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
     await this.conn.run(
       sql,
@@ -118,6 +117,25 @@ export class DuckDbNode extends DuckDB {
       JSON.stringify(data.transaction),
       data.status,
       data.sigset.createTime
+    );
+  }
+
+  // TODO: use typescript here instead of any
+  async updateCheckpoint(data: CheckpointDataInterface, tableName: string) {
+    const sql = `UPDATE ${tableName} SET sigset = ?, feeRate = ?, feeCollected = ?, signedAtBtcHeight = ?, transaction = ?, status = ?, createTime = ? WHERE checkpointIndex = ?`;
+
+    console.log(sql);
+
+    await this.conn.run(
+      sql,
+      JSON.stringify(data.sigset),
+      data.feeRate,
+      data.feesCollected,
+      data.signedAtBtcHeight,
+      JSON.stringify(data.transaction),
+      data.status,
+      data.sigset.createTime,
+      data.sigset.index
     );
   }
 

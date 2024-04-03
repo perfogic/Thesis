@@ -2,6 +2,7 @@ import { DuckDbNode } from "./db";
 import { getCheckpointData, getCheckpointQueue } from "../utils/lcd";
 import { TableName } from "../utils/db";
 import env from "../configs/env";
+import { CheckpointStatus } from "../@types";
 
 export class CheckpointPolling {
   static index: number = -1;
@@ -23,7 +24,13 @@ export class CheckpointPolling {
       this.index = env.checkpoint.firstCheckpointIndex;
       return;
     }
-    this.index = latestCheckpoints[0].checkpointIndex + 1;
+
+    if (latestCheckpoints[0].status == CheckpointStatus.Building) {
+      this.index = latestCheckpoints[0].checkpointIndex;
+      return;
+    }
+
+    this.index = latestCheckpoints[0].checkpointIndex;
   }
 
   // Do polling each time
@@ -31,7 +38,7 @@ export class CheckpointPolling {
     while (true) {
       try {
         await this._initialize();
-        if (this.index == this.latestIndex) {
+        if (this.index > this.latestIndex) {
           console.log(
             `Running at latest checkpoint ${this.index}, no need to crawling`
           );
@@ -53,7 +60,16 @@ export class CheckpointPolling {
             insertData,
             TableName.Checkpoint
           );
+        } else if (data[0].status !== data[1].status) {
+          let insertData = { ...data[0] };
+          await DuckDbNode.instances.updateCheckpoint(
+            insertData,
+            TableName.Checkpoint
+          );
+        } else {
+          console.log(`Skipping handle checkpoint ${this.index}`);
         }
+
         if (this.index < this.latestIndex) {
           this.index++;
         }
