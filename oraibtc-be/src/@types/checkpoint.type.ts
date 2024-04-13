@@ -39,7 +39,26 @@ export interface CheckpointDataInterface {
     hash: String;
     data: TransactionData;
   };
+  config: CheckpointConfig;
+  valueLocked: string;
   status: CheckpointStatus;
+}
+
+interface CheckpointConfig {
+  emergencyDisbursalLockTimeInterval: number;
+  emergencyDisbursalMaxTxSize: number;
+  emergencyDisbursalMinTxAmt: number;
+  maxAge: number;
+  maxCheckpointInterval: number;
+  maxFeeRate: number;
+  maxInputs: number;
+  maxOutputs: number;
+  maxUnconfirmedCheckpoints: number;
+  minCheckpointInterval: number;
+  minFeeRate: number;
+  sigsetThreshold: number[];
+  targetCheckpointInclusion: number;
+  userFeeFactor: number;
 }
 
 export interface StoredCheckpointDataInterface
@@ -53,4 +72,9 @@ export interface CheckpointQueueInterface {
   index: number;
   first_unhandled_confirmed_cp_index: number;
   confirmed_index: number;
+}
+
+export interface DepositFeeChartItem {
+  time: number;
+  value: string;
 }

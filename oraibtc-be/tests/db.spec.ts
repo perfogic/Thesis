@@ -68,12 +68,19 @@ describe("Testing DuckDB Checkpoint", () => {
 
   it("Test query from checkpointIndex", async () => {
     const data: any = await DuckDbNode.instances.queryCheckpointByIndex(1);
-    console.log(data);
     expect(data?.checkpointIndex).toBe(1);
   });
 
   it("Test query latest checkpoints", async () => {
     const data = await DuckDbNode.instances.queryLatestCheckpoints(2);
+    expect(data.length).toBe(2);
+  });
+
+  it("Test query checkpoints by times", async () => {
+    const data = await DuckDbNode.instances.queryCheckpointsByUpperBoundTime(
+      1711865289710,
+      5
+    );
     expect(data.length).toBe(2);
   });
 });

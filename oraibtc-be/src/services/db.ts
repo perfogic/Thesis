@@ -8,6 +8,7 @@ import { Connection, Database } from "duckdb-async";
 import fs from "fs";
 import { toObject } from "@oraichain/oraidex-common";
 import { toCamel } from "snake-camel";
+import _ from "lodash";
 
 export const sqlCommands = {
   create: {
@@ -20,6 +21,8 @@ export const sqlCommands = {
       transaction VARCHAR,
       sigset VARCHAR,
       status VARCHAR,
+      config VARCHAR,
+      valueLocked VARCHAR,
       createTime BIGINT
     )`,
   },
@@ -31,12 +34,42 @@ export const sqlCommands = {
       order: QueryOrderEnum = QueryOrderEnum.DESC
     ) =>
       `SELECT * from Checkpoint ORDER BY checkpointIndex ${order} LIMIT ${limit}`,
+    getCheckpointsByUpperBoundTime: (
+      date: number,
+      limit: number,
+      order: QueryOrderEnum = QueryOrderEnum.DESC
+    ) =>
+      `SELECT * from Checkpoint WHERE createTime <= ${date} ORDER BY createTime ${order} LIMIT ${limit}`,
+    getCheckpointsInRangeTime: (
+      startTime: number,
+      endTime: number,
+      order: QueryOrderEnum = QueryOrderEnum.DESC
+    ) =>
+      `SELECT * from Checkpoint WHERE createTime <= ${endTime} AND createTime >= ${startTime} ORDER BY createTime ${order}`,
   },
 };
 
 export abstract class DuckDB {
   abstract createTable(): Promise<void>;
   abstract dropTable(tableName: string): Promise<void>;
+  abstract select(tableName: TableName, options: OptionInterface): Promise<any>;
+  abstract insert(tableName: TableName, data: Object): Promise<void>;
+  abstract update(
+    tableName: TableName,
+    overrideData: Object,
+    options: OptionInterface
+  ): Promise<void>;
+}
+
+export interface PaginationInterface {
+  limit?: number;
+  offset?: number;
+}
+
+export interface OptionInterface {
+  where?: Object;
+  attributes?: string[];
+  pagination?: PaginationInterface;
 }
 
 export class DuckDbNode extends DuckDB {
@@ -46,6 +79,34 @@ export class DuckDbNode extends DuckDB {
     private db: Database
   ) {
     super();
+  }
+
+  async select(tableName: TableName, options: OptionInterface): Promise<any> {
+    const defaultOptions = {
+      where: {},
+      attributes: [],
+      pagination: {},
+    };
+    const [query, values] = this.selectClause(tableName, {
+      ...defaultOptions,
+      ...options,
+    });
+    const result = await this.conn.all(query, ...values);
+    return result;
+  }
+
+  async insert(tableName: TableName, data: Object): Promise<void> {
+    const [query, values] = this.insertClause(tableName, data);
+    await this.conn.run(query, ...values);
+  }
+
+  async update(
+    tableName: TableName,
+    overrideData: Object,
+    options: OptionInterface
+  ): Promise<void> {
+    const [query, values] = this.updateClause(tableName, overrideData, options);
+    await this.conn.run(query, ...values);
   }
 
   static async create(tableName?: string): Promise<DuckDbNode> {
@@ -79,9 +140,52 @@ export class DuckDbNode extends DuckDB {
         ...(item as any),
         sigset: toCamel(JSON.parse(item.sigset.toString())),
         transaction: toCamel(JSON.parse(item.transaction.toString())),
+        config: toCamel(JSON.parse(item.config.toString())),
       };
     }
     return null;
+  }
+
+  async queryCheckpointsByUpperBoundTime(
+    date: number,
+    limit: number,
+    order: QueryOrderEnum = QueryOrderEnum.DESC
+  ): Promise<StoredCheckpointDataInterface[]> {
+    const result = await this.conn.all(
+      sqlCommands.query.getCheckpointsByUpperBoundTime(date, limit, order)
+    );
+    if (result.length > 0) {
+      return result.map((item: any) => {
+        return {
+          ...item,
+          sigset: toCamel(JSON.parse(item.sigset.toString())),
+          transaction: toCamel(JSON.parse(item.transaction.toString())),
+          config: toCamel(JSON.parse(item.config.toString())),
+        };
+      });
+    }
+    return [];
+  }
+
+  async queryCheckpointsByRangeTime(
+    startTime: number,
+    endTime: number,
+    order: QueryOrderEnum = QueryOrderEnum.ASC
+  ): Promise<StoredCheckpointDataInterface[]> {
+    const result = await this.conn.all(
+      sqlCommands.query.getCheckpointsInRangeTime(startTime, endTime, order)
+    );
+    if (result.length > 0) {
+      return result.map((item: any) => {
+        return {
+          ...item,
+          sigset: toCamel(JSON.parse(item.sigset.toString())),
+          transaction: toCamel(JSON.parse(item.transaction.toString())),
+          config: toCamel(JSON.parse(item.config.toString())),
+        };
+      });
+    }
+    return [];
   }
 
   async queryLatestCheckpoints(
@@ -97,6 +201,7 @@ export class DuckDbNode extends DuckDB {
           ...item,
           sigset: toCamel(JSON.parse(item.sigset.toString())),
           transaction: toCamel(JSON.parse(item.transaction.toString())),
+          config: toCamel(JSON.parse(item.config.toString())),
         };
       });
     }
@@ -105,7 +210,7 @@ export class DuckDbNode extends DuckDB {
 
   // TODO: use typescript here instead of any
   async insertCheckpoint(data: CheckpointDataInterface, tableName: string) {
-    const sql = `INSERT INTO ${tableName} (checkpointIndex, sigset, feeRate, feeCollected, signedAtBtcHeight, transaction, status, createTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO ${tableName} (checkpointIndex, sigset, feeRate, feeCollected, signedAtBtcHeight, transaction, config, valueLocked, status, createTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     await this.conn.run(
       sql,
@@ -115,6 +220,8 @@ export class DuckDbNode extends DuckDB {
       data.feesCollected,
       data.signedAtBtcHeight,
       JSON.stringify(data.transaction),
+      JSON.stringify(data.config),
+      data.valueLocked,
       data.status,
       data.sigset.createTime
     );
@@ -122,9 +229,7 @@ export class DuckDbNode extends DuckDB {
 
   // TODO: use typescript here instead of any
   async updateCheckpoint(data: CheckpointDataInterface, tableName: string) {
-    const sql = `UPDATE ${tableName} SET sigset = ?, feeRate = ?, feeCollected = ?, signedAtBtcHeight = ?, transaction = ?, status = ?, createTime = ? WHERE checkpointIndex = ?`;
-
-    console.log(sql);
+    const sql = `UPDATE ${tableName} SET sigset = ?, feeRate = ?, feeCollected = ?, signedAtBtcHeight = ?, transaction = ?, config = ?, status = ?, valueLocked = ?, createTime = ? WHERE checkpointIndex = ?`;
 
     await this.conn.run(
       sql,
@@ -133,7 +238,9 @@ export class DuckDbNode extends DuckDB {
       data.feesCollected,
       data.signedAtBtcHeight,
       JSON.stringify(data.transaction),
+      JSON.stringify(data.config),
       data.status,
+      data.valueLocked,
       data.sigset.createTime,
       data.sigset.index
     );
@@ -152,5 +259,72 @@ export class DuckDbNode extends DuckDB {
   async dropTable(tableName: string) {
     const query = `DROP TABLE ${tableName}`;
     await this.conn.run(query);
+  }
+
+  // ORM BASIC
+  selectClause(
+    tableName: string,
+    options: OptionInterface = {
+      where: {},
+      attributes: [],
+      pagination: {},
+    }
+  ): [string, any[]] {
+    const attributes = options.attributes;
+    const whereKeys = Object.keys(options.where);
+    const whereValues = Object.values(options.where);
+    const whereClauses =
+      whereKeys.length > 0
+        ? `WHERE ${whereKeys.map((item) => `${item} = ?`).join(" AND ")}`
+        : "";
+    const paginationKeys = Object.keys(options.pagination);
+    const paginationValues = Object.values(options.pagination);
+    const paginationClause =
+      paginationKeys.length > 0
+        ? `${options.pagination?.limit ? `LIMIT ?` : ""} ${
+            options.pagination?.offset ? "OFFSET ?" : ""
+          }`
+        : "";
+
+    const query = _.trim(
+      `SELECT ${
+        attributes.length > 0 ? attributes.join(", ") : "*"
+      } FROM ${tableName} ${whereClauses} ${paginationClause}`
+    );
+
+    return [query, [...whereValues, ...paginationValues]];
+  }
+
+  insertClause(tableName: string, data: Object): [string, any[]] {
+    const keys = Object.keys(data);
+    const values = Object.values(data);
+    const query = `INSERT OR IGNORE INTO ${tableName} (${keys.join(
+      ", "
+    )}) VALUES (${keys.map((_) => "?").join(", ")})`;
+    return [_.trim(query), values];
+  }
+
+  updateClause(
+    tableName: TableName,
+    overrideData: Object,
+    options: OptionInterface
+  ): [string, any[]] {
+    const overrideDataKeys = Object.keys(overrideData);
+    const overrideDataValues = Object.values(overrideData);
+    const setDataClause = `SET ${overrideDataKeys
+      .map((item) => `${item} = ?`)
+      .join(", ")}`;
+    const whereKeys = Object.keys(options.where);
+    const whereValues = Object.values(options.where);
+    const whereClauses =
+      whereKeys.length > 0
+        ? `WHERE ${whereKeys.map((item) => `${item} = ?`).join(" AND ")}`
+        : "";
+
+    const query = _.trim(
+      `UPDATE ${tableName} ${setDataClause} ${whereClauses}`
+    );
+
+    return [query, [...overrideDataValues, ...whereValues]];
   }
 }

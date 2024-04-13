@@ -11,6 +11,7 @@ import morgan from "./configs/morgan";
 import env from "./configs/env";
 import { DuckDbNode } from "./services/db";
 import { CheckpointPolling } from "./services/checkpoint";
+import checkpointRoute from "./routes/checkpoint.route";
 const app = express();
 const server = http.createServer(app);
 
@@ -43,9 +44,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 const PORT = env.port || 8000;
 
 /**
- * There are 2 main routes here:
- * /api/value_locked/charts?type=${day,week,month} // we should cache here, after each time polling
- * /api/fee_rate/charts?type=${day,week,month} // we should cache here, after each time polling
+ * There are api main routes here:
+ * /api/value_locked/charts?time=${SECONDS} // we should cache here, after each time polling
+ * /api/fee_rate/charts?time=${SECONDS} // we should cache here, after each time polling
+ * /api/deposit_fees?date=${}
  */
 
 /**
@@ -60,6 +62,19 @@ const PORT = env.port || 8000;
  *  status: string (COMPLETE, SIGNING, BUILDING)
  *  create_time: number
  */
+
+app.use("/api/checkpoint", checkpointRoute);
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  const status = err.status || 500;
+  const message = err.message || "Something went wrong";
+  return res.status(status).json({
+    status,
+    message,
+    success: false,
+    stack: env.env == "development" ? err.stack : null,
+  });
+});
 
 server.listen(PORT, async () => {
   console.log("NODE IS RUNNING ON PORT " + PORT);

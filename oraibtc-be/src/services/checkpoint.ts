@@ -1,5 +1,10 @@
 import { DuckDbNode } from "./db";
-import { getCheckpointData, getCheckpointQueue } from "../utils/lcd";
+import {
+  getCheckpointConfig,
+  getCheckpointData,
+  getCheckpointQueue,
+  getValueLocked,
+} from "../utils/lcd";
 import { TableName } from "../utils/db";
 import env from "../configs/env";
 import { CheckpointStatus } from "../@types";
@@ -14,7 +19,16 @@ export class CheckpointPolling {
   // else save it to 0
   private static async _initialize(): Promise<void> {
     // Set latest index value
-    const checkpointQueue = await getCheckpointQueue();
+    let checkpointQueue = null;
+    while (true) {
+      try {
+        checkpointQueue = await getCheckpointQueue();
+
+        if (checkpointQueue !== null) {
+          break;
+        }
+      } catch (err) {}
+    }
     this.latestIndex = checkpointQueue.index;
 
     // Set index value
@@ -47,16 +61,21 @@ export class CheckpointPolling {
         const data = await Promise.all([
           getCheckpointData(this.index),
           DuckDbNode.instances.queryCheckpointByIndex(this.index),
+          getCheckpointConfig(),
+          getValueLocked(),
         ]);
 
+        if (!data[0] && !data[2] && data[3] === null) {
+          continue;
+        }
+
+        let insertData = { ...data[0], config: data[2], valueLocked: data[3] };
         if (data[1] === null) {
-          let insertData = { ...data[0] };
           await DuckDbNode.instances.insertCheckpoint(
             insertData,
             TableName.Checkpoint
           );
         } else if (data[0].status !== data[1].status) {
-          let insertData = { ...data[0] };
           await DuckDbNode.instances.updateCheckpoint(
             insertData,
             TableName.Checkpoint

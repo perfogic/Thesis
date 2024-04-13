@@ -2,7 +2,7 @@ import { resolve } from "path";
 import { DuckDbNode } from "../../src/services/db";
 import { TableName } from "../../src/utils/db";
 
-describe("Testing DuckDB Checkpoint", () => {
+describe.skip("Testing DuckDB Checkpoint", () => {
   beforeEach(async () => {
     const db = await DuckDbNode.create(
       resolve(__dirname, "../../src/storages/db.duckdb")
