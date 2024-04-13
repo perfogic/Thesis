@@ -8,11 +8,7 @@ import {
   AXIOS_THROTTLE_THRESHOLD,
 } from "@oraichain/oraidex-common";
 import env from "../configs/env";
-import {
-  CheckpointDataInterface,
-  CheckpointQueueInterface,
-  CheckpointStatus,
-} from "../@types";
+import { CheckpointQueueInterface } from "../@types";
 import { toCamel } from "snake-camel";
 
 const axios = Axios.create({
@@ -29,33 +25,14 @@ const axios = Axios.create({
 
 export const getCheckpointData = async (
   checkpointIndex: number
-): Promise<CheckpointDataInterface> => {
+): Promise<any | null> => {
   try {
     const res = await axios.get(`/bitcoin/checkpoint/${checkpointIndex}`, {});
     let data = res.data.data;
     return toCamel(data) as any;
   } catch (e) {
-    return {
-      feesCollected: 0,
-      feeRate: 0,
-      signedAtBtcHeight: 0,
-      sigset: {
-        createTime: 0,
-        index: 0,
-        possibleVp: 0,
-        presentVp: 0,
-        signatories: [],
-      },
-      status: CheckpointStatus.Building,
-      transaction: {
-        hash: "",
-        data: {
-          input: [],
-          output: [],
-          lockTime: 0,
-        },
-      },
-    };
+    console.error("getCheckpointData", e);
+    return null;
   }
 };
 
@@ -66,10 +43,32 @@ export const getCheckpointQueue =
       return res.data;
     } catch (e) {
       console.error("getCheckpointQueue", e);
-      return {
-        index: 0,
-        first_unhandled_confirmed_cp_index: 0,
-        confirmed_index: 0,
-      };
+      throw new Error(e?.message);
     }
   };
+
+export const getCheckpointConfig = async (): Promise<any | null> => {
+  try {
+    const res = await axios.get("/bitcoin/checkpoint/config", {});
+    return res.data;
+  } catch (e) {
+    console.error("getCheckpointConfig", e);
+    null;
+  }
+};
+
+export const getDepositFees = async (
+  checkpointIndex: number | undefined
+): Promise<number> => {
+  try {
+    const res = await axios.get("/bitcoin/deposit_fees", {
+      params: {
+        checkpoint_index: checkpointIndex,
+      },
+    });
+    return res.data.deposit_fees;
+  } catch (e) {
+    console.error("getCheckpointQueue", e);
+    return -1;
+  }
+};

@@ -61,6 +61,7 @@
     "joi": "^17.4.2",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
+    "lodash": "^4.17.21",
     "module-alias": "^2.2.2",
     "mongoose": "^6.0.12",
     "morgan": "^1.10.0",
