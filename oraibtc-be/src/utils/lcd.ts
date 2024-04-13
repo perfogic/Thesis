@@ -72,3 +72,23 @@ export const getDepositFees = async (
     return -1;
   }
 };
+
+export const getValueLocked = async (): Promise<string> => {
+  try {
+    const res = await axios.get("/bitcoin/value_locked", {});
+    return res.data.value.toString();
+  } catch (e) {
+    console.error("getValueLocked", e);
+    return "0";
+  }
+};
+
+export const getScriptPubkey = async (dest: string) => {
+  try {
+    const res = await axios(`/bitcoin/script_pubkey/${dest}`);
+    const scriptPubkey = res.data;
+    return scriptPubkey;
+  } catch (err) {
+    return "";
+  }
+};

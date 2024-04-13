@@ -3,6 +3,7 @@ import {
   getCheckpointConfig,
   getCheckpointData,
   getCheckpointQueue,
+  getValueLocked,
 } from "../utils/lcd";
 import { TableName } from "../utils/db";
 import env from "../configs/env";
@@ -61,13 +62,14 @@ export class CheckpointPolling {
           getCheckpointData(this.index),
           DuckDbNode.instances.queryCheckpointByIndex(this.index),
           getCheckpointConfig(),
+          getValueLocked(),
         ]);
 
-        if (!data[0] && !data[2]) {
+        if (!data[0] && !data[2] && data[3] === null) {
           continue;
         }
 
-        let insertData = { ...data[0], config: data[2] };
+        let insertData = { ...data[0], config: data[2], valueLocked: data[3] };
         if (data[1] === null) {
           await DuckDbNode.instances.insertCheckpoint(
             insertData,

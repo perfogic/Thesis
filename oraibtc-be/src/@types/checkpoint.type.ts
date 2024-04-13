@@ -40,6 +40,7 @@ export interface CheckpointDataInterface {
     data: TransactionData;
   };
   config: CheckpointConfig;
+  valueLocked: string;
   status: CheckpointStatus;
 }
 
@@ -71,4 +72,9 @@ export interface CheckpointQueueInterface {
   index: number;
   first_unhandled_confirmed_cp_index: number;
   confirmed_index: number;
+}
+
+export interface DepositFeeChartItem {
+  time: number;
+  value: string;
 }

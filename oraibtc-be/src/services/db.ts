@@ -22,6 +22,7 @@ export const sqlCommands = {
       sigset VARCHAR,
       status VARCHAR,
       config VARCHAR,
+      valueLocked VARCHAR,
       createTime BIGINT
     )`,
   },
@@ -39,6 +40,12 @@ export const sqlCommands = {
       order: QueryOrderEnum = QueryOrderEnum.DESC
     ) =>
       `SELECT * from Checkpoint WHERE createTime <= ${date} ORDER BY createTime ${order} LIMIT ${limit}`,
+    getCheckpointsInRangeTime: (
+      startTime: number,
+      endTime: number,
+      order: QueryOrderEnum = QueryOrderEnum.DESC
+    ) =>
+      `SELECT * from Checkpoint WHERE createTime <= ${endTime} AND createTime >= ${startTime} ORDER BY createTime ${order}`,
   },
 };
 
@@ -160,6 +167,27 @@ export class DuckDbNode extends DuckDB {
     return [];
   }
 
+  async queryCheckpointsByRangeTime(
+    startTime: number,
+    endTime: number,
+    order: QueryOrderEnum = QueryOrderEnum.ASC
+  ): Promise<StoredCheckpointDataInterface[]> {
+    const result = await this.conn.all(
+      sqlCommands.query.getCheckpointsInRangeTime(startTime, endTime, order)
+    );
+    if (result.length > 0) {
+      return result.map((item: any) => {
+        return {
+          ...item,
+          sigset: toCamel(JSON.parse(item.sigset.toString())),
+          transaction: toCamel(JSON.parse(item.transaction.toString())),
+          config: toCamel(JSON.parse(item.config.toString())),
+        };
+      });
+    }
+    return [];
+  }
+
   async queryLatestCheckpoints(
     limit: number,
     order: QueryOrderEnum = QueryOrderEnum.DESC
@@ -182,7 +210,7 @@ export class DuckDbNode extends DuckDB {
 
   // TODO: use typescript here instead of any
   async insertCheckpoint(data: CheckpointDataInterface, tableName: string) {
-    const sql = `INSERT INTO ${tableName} (checkpointIndex, sigset, feeRate, feeCollected, signedAtBtcHeight, transaction, config, status, createTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO ${tableName} (checkpointIndex, sigset, feeRate, feeCollected, signedAtBtcHeight, transaction, config, valueLocked, status, createTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     await this.conn.run(
       sql,
@@ -193,6 +221,7 @@ export class DuckDbNode extends DuckDB {
       data.signedAtBtcHeight,
       JSON.stringify(data.transaction),
       JSON.stringify(data.config),
+      data.valueLocked,
       data.status,
       data.sigset.createTime
     );
@@ -200,7 +229,7 @@ export class DuckDbNode extends DuckDB {
 
   // TODO: use typescript here instead of any
   async updateCheckpoint(data: CheckpointDataInterface, tableName: string) {
-    const sql = `UPDATE ${tableName} SET sigset = ?, feeRate = ?, feeCollected = ?, signedAtBtcHeight = ?, transaction = ?, config = ?, status = ?, createTime = ? WHERE checkpointIndex = ?`;
+    const sql = `UPDATE ${tableName} SET sigset = ?, feeRate = ?, feeCollected = ?, signedAtBtcHeight = ?, transaction = ?, config = ?, status = ?, valueLocked = ?, createTime = ? WHERE checkpointIndex = ?`;
 
     await this.conn.run(
       sql,
@@ -211,6 +240,7 @@ export class DuckDbNode extends DuckDB {
       JSON.stringify(data.transaction),
       JSON.stringify(data.config),
       data.status,
+      data.valueLocked,
       data.sigset.createTime,
       data.sigset.index
     );

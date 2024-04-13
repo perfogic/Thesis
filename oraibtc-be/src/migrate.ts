@@ -1,7 +1,9 @@
 import { resolve } from "path";
 import { DuckDbNode } from "services/db";
+import { getValueLocked } from "utils/blockstream";
 import { TableName } from "utils/db";
 import { getCheckpointConfig } from "utils/lcd";
+import { toDisplay } from "@oraichain/oraidex-common";
 
 const main = async () => {
   await DuckDbNode.create(resolve(__dirname, "../src/storages/db.duckdb"));
@@ -10,25 +12,24 @@ const main = async () => {
   const data = await DuckDbNode.instances.select(TableName.Checkpoint, {
     where: {},
   });
-  const config = await getCheckpointConfig();
 
   for (const checkpoint of data) {
-    console.log(checkpoint.checkpointIndex);
-    if (checkpoint.createTime > 1711670400)
-      await DuckDbNode.instances.update(
-        TableName.Checkpoint,
-        {
-          config: {
-            ...config,
-            user_fee_factor: checkpoint.createTime > 1711670400 ? 27000 : 21000,
-          },
+    console.log(checkpoint);
+    const output = JSON.parse(checkpoint.transaction).data.input[0]
+      .previousOutput;
+    const [txid, vout] = output.split(":");
+    const valueLocked = await getValueLocked(txid, vout);
+    await DuckDbNode.instances.update(
+      TableName.Checkpoint,
+      {
+        valueLocked: valueLocked.toString(),
+      },
+      {
+        where: {
+          checkpointIndex: checkpoint.checkpointIndex,
         },
-        {
-          where: {
-            checkpointIndex: checkpoint.checkpointIndex,
-          },
-        }
-      );
+      }
+    );
   }
 };
 

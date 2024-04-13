@@ -41,6 +41,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@cosmjs/math": "^0.32.3",
     "@duckdb/duckdb-wasm": "^1.27.1-dev125.0",
     "@oraichain/oraidex-common": "^1.0.81",
     "add": "^2.0.6",
