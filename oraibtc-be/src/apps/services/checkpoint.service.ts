@@ -45,25 +45,25 @@ const getAllCharts = async ({ startTime, endTime, address }): Promise<any> => {
 
   const depositData = allCheckpoints.map((item) => {
     return {
-      time: new Date(item.createTime).setHours(0, 0, 0),
+      time: item.createTime,
       value: calcDepositFee(item) * 10 ** 6,
     };
   });
   const withdrawData = allCheckpoints.map((item) => {
     return {
-      time: new Date(item.createTime).setHours(0, 0, 0),
+      time: item.createTime,
       value: calcWithdrawFees(scriptPubkey, item) * 10 ** 6,
     };
   });
   const feeRateData = allCheckpoints.map((item) => {
     return {
-      time: new Date(item.createTime).setHours(0, 0, 0),
+      time: item.createTime,
       value: item.feeRate,
     };
   });
   const valueLockedData = allCheckpoints.map((item) => {
     return {
-      time: new Date(item.createTime).setHours(0, 0, 0),
+      time: item.createTime,
       value: item.valueLocked,
     };
   });
