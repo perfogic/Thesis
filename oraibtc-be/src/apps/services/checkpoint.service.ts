@@ -64,7 +64,7 @@ const getAllCharts = async ({ startTime, endTime, address }): Promise<any> => {
   const valueLockedData = allCheckpoints.map((item) => {
     return {
       time: new Date(item.createTime).setHours(0, 0, 0),
-      value: parseInt(item.valueLocked),
+      value: item.valueLocked,
     };
   });
 

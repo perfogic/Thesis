@@ -73,13 +73,13 @@ export const getDepositFees = async (
   }
 };
 
-export const getValueLocked = async (): Promise<string> => {
+export const getValueLocked = async (): Promise<number> => {
   try {
     const res = await axios.get("/bitcoin/value_locked", {});
-    return res.data.value.toString();
+    return res.data.value;
   } catch (e) {
     console.error("getValueLocked", e);
-    return "0";
+    return 0;
   }
 };
 

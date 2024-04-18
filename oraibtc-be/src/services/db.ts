@@ -22,7 +22,7 @@ export const sqlCommands = {
       sigset VARCHAR,
       status VARCHAR,
       config VARCHAR,
-      valueLocked VARCHAR,
+      valueLocked BIGINT,
       createTime BIGINT
     )`,
   },

@@ -2,8 +2,6 @@ import { resolve } from "path";
 import { DuckDbNode } from "services/db";
 import { getValueLocked } from "utils/blockstream";
 import { TableName } from "utils/db";
-import { getCheckpointConfig } from "utils/lcd";
-import { toDisplay } from "@oraichain/oraidex-common";
 
 const main = async () => {
   await DuckDbNode.create(resolve(__dirname, "../src/storages/db.duckdb"));
@@ -22,7 +20,7 @@ const main = async () => {
     await DuckDbNode.instances.update(
       TableName.Checkpoint,
       {
-        valueLocked: valueLocked.toString(),
+        valueLocked: valueLocked,
       },
       {
         where: {

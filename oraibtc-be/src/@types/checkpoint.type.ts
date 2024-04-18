@@ -40,7 +40,7 @@ export interface CheckpointDataInterface {
     data: TransactionData;
   };
   config: CheckpointConfig;
-  valueLocked: string;
+  valueLocked: number;
   status: CheckpointStatus;
 }
 

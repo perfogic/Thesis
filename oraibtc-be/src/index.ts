@@ -21,7 +21,7 @@ app.use(morgan.errorHandler);
 app.use(helmet());
 app.use(
   cors({
-    origin: ["*"],
+    origin: "*",
     credentials: true,
     exposedHeaders: ["set-cookie"],
   })

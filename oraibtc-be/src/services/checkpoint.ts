@@ -40,7 +40,7 @@ export class CheckpointPolling {
       return;
     }
 
-    if (latestCheckpoints[0].status == CheckpointStatus.Building) {
+    if (latestCheckpoints[0].status !== CheckpointStatus.Complete) {
       this.index = latestCheckpoints[0].checkpointIndex;
       return;
     }
