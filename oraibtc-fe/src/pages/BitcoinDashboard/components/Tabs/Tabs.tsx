@@ -1,37 +1,42 @@
-import classNames from 'classnames';
-import { FC, useEffect } from 'react';
-import styles from './style.module.scss';
-import { useSearchParams } from 'react-router-dom';
+import classNames from "classnames";
+import { FC, useEffect } from "react";
+import styles from "./style.module.scss";
+import { useSearchParams } from "react-router-dom";
 
 export enum KeysFilter {
-  pending_deposits = 'pending_deposits',
-  pending_withdraws = 'pending_withdraws',
-  checkpoint = 'checkpoint'
+  pending_deposits = "pending_deposits",
+  pending_withdraws = "pending_withdraws",
+  checkpoint = "checkpoint",
+  analytic = "analytic",
 }
 
 const LIST_FILTERS = [
   {
     key: KeysFilter.pending_deposits,
-    text: 'Pending Deposits'
+    text: "Pending Deposits",
   },
   {
     key: KeysFilter.pending_withdraws,
-    text: 'Pending Withdraws'
+    text: "Pending Withdraws",
   },
   {
     key: KeysFilter.checkpoint,
-    text: 'Checkpoint'
-  }
+    text: "Checkpoint",
+  },
+  {
+    key: KeysFilter.analytic,
+    text: "Analytics",
+  },
 ];
 
 export const Tabs: FC<{}> = ({}) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get('tab');
+  const tab = searchParams.get("tab");
 
   useEffect(() => {
     if (!tab) {
       setSearchParams({
-        tab: KeysFilter.pending_deposits
+        tab: KeysFilter.pending_deposits,
       });
     }
   }, []);
@@ -42,10 +47,13 @@ export const Tabs: FC<{}> = ({}) => {
         {LIST_FILTERS.map((item) => (
           <div
             key={item.key}
-            className={classNames(item.key === tab ? styles.filter_active : null, styles.filter_item)}
+            className={classNames(
+              item.key === tab ? styles.filter_active : null,
+              styles.filter_item
+            )}
             onClick={() => {
               setSearchParams({
-                tab: item.key
+                tab: item.key,
               });
             }}
           >

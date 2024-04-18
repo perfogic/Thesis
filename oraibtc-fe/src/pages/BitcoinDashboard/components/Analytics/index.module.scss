@@ -1,0 +1,12 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); /* tự động chia đều các cột */
+    gap: 30px; /* khoảng cách giữa các cột */
+}
+
+@media (min-width: 769px) {
+    /* chỉ áp dụng khi độ rộng lớn hơn 768px */
+    .grid-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 cột */
+    }
+}
