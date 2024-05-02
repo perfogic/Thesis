@@ -34,9 +34,9 @@ export interface WithdrawalFeeInterface {
 }
 
 export enum CheckpointStatus {
-  Building = 'Building',
-  Signing = 'Signing',
-  Complete = 'Complete'
+  Building = "Building",
+  Signing = "Signing",
+  Complete = "Complete",
 }
 
 export interface SigsetInterface {
@@ -109,4 +109,8 @@ export interface CheckpointParsedData {
 export interface CheckpointFeeInfoInterface {
   fees_collected: number;
   miner_fee: number;
+}
+
+export interface EscrowBalanceInterface {
+  escrow_balance: number;
 }

@@ -1,39 +1,46 @@
 import {
   IBC_WASM_CONTRACT,
   WEBSOCKET_RECONNECT_ATTEMPTS,
-  WEBSOCKET_RECONNECT_INTERVAL
-} from '@oraichain/oraidex-common';
-import { isMobile } from '@walletconnect/browser-utils';
-import { TToastType, displayToast } from 'components/Toasts/Toast';
-import { network } from 'config/networks';
-import { ThemeProvider } from 'context/theme-context';
-import { getListAddressCosmos, getNetworkGasPrice } from 'helper';
-import useConfigReducer from 'hooks/useConfigReducer';
-import useLoadTokens from 'hooks/useLoadTokens';
-import useWalletReducer from 'hooks/useWalletReducer';
-import Keplr from 'libs/keplr';
-import { buildUnsubscribeMessage, buildWebsocketSendMessage, processWsResponseMsg } from 'libs/utils';
-import { useEffect, useState } from 'react';
-import useWebSocket from 'react-use-websocket';
-import routes from 'routes';
-import { persistor } from 'store/configure';
-import { PERSIST_VER } from 'store/constants';
-import Menu from './Menu';
-import './index.scss';
-import { NoticeBanner } from './NoticeBanner';
-import Sidebar from './Sidebar';
+  WEBSOCKET_RECONNECT_INTERVAL,
+} from "@oraichain/oraidex-common";
+import { isMobile } from "@walletconnect/browser-utils";
+import { TToastType, displayToast } from "components/Toasts/Toast";
+import { network } from "config/networks";
+import { ThemeProvider } from "context/theme-context";
+import { getListAddressCosmos, getNetworkGasPrice } from "helper";
+import useConfigReducer from "hooks/useConfigReducer";
+import useLoadTokens from "hooks/useLoadTokens";
+import useWalletReducer from "hooks/useWalletReducer";
+import Keplr from "libs/keplr";
+import {
+  buildUnsubscribeMessage,
+  buildWebsocketSendMessage,
+  processWsResponseMsg,
+} from "libs/utils";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useWebSocket from "react-use-websocket";
+import routes from "routes";
+import { persistor } from "store/configure";
+import { PERSIST_VER } from "store/constants";
+import Menu from "./Menu";
+import "./index.scss";
+import { NoticeBanner } from "./NoticeBanner";
+import Sidebar from "./Sidebar";
 
 const App = () => {
-  const [address, setOraiAddress] = useConfigReducer('address');
-  const [btcAddress, setBtcAddress] = useConfigReducer('btcAddress');
-  const [walletTypeStore] = useConfigReducer('walletTypeStore');
-  const [, setStatusChangeAccount] = useConfigReducer('statusChangeAccount');
+  const [address, setOraiAddress] = useConfigReducer("address");
+  const [btcAddress, setBtcAddress] = useConfigReducer("btcAddress");
+  const [walletTypeStore] = useConfigReducer("walletTypeStore");
+  const [, setStatusChangeAccount] = useConfigReducer("statusChangeAccount");
   const loadTokenAmounts = useLoadTokens();
-  const [persistVersion, setPersistVersion] = useConfigReducer('persistVersion');
-  const [theme] = useConfigReducer('theme');
-  const [walletByNetworks] = useWalletReducer('walletsByNetwork');
-  const [, setCosmosAddress] = useConfigReducer('cosmosAddress');
+  const [persistVersion, setPersistVersion] =
+    useConfigReducer("persistVersion");
+  const [theme] = useConfigReducer("theme");
+  const [walletByNetworks] = useWalletReducer("walletsByNetwork");
+  const [, setCosmosAddress] = useConfigReducer("cosmosAddress");
   const mobileMode = isMobile();
+  const navigate = useNavigate();
   // useTronEventListener();
 
   //Public API that will echo messages sent to it back to the client
@@ -41,7 +48,7 @@ const App = () => {
     `wss://${new URL(network.rpc).host}/websocket`, // only get rpc.orai.io
     {
       onOpen: () => {
-        console.log('opened websocket, subscribing...');
+        console.log("opened websocket, subscribing...");
         // subscribe to IBC Wasm case
         sendJsonMessage(
           buildWebsocketSendMessage(
@@ -57,19 +64,19 @@ const App = () => {
         // sendJsonMessage(buildWebsocketSendMessage(`wasm.from = '${address}'`, 4), true);
       },
       onClose: () => {
-        console.log('unsubscribe all clients');
+        console.log("unsubscribe all clients");
         sendJsonMessage(buildUnsubscribeMessage());
       },
       onReconnectStop(numAttempts) {
         // if cannot reconnect then we unsubscribe all
         if (numAttempts === WEBSOCKET_RECONNECT_ATTEMPTS) {
-          console.log('reconnection reaches above limit. Unsubscribe to all!');
+          console.log("reconnection reaches above limit. Unsubscribe to all!");
           sendJsonMessage(buildUnsubscribeMessage());
         }
       },
       shouldReconnect: (closeEvent) => true,
       reconnectAttempts: WEBSOCKET_RECONNECT_ATTEMPTS,
-      reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL
+      reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL,
     }
   );
 
@@ -78,15 +85,21 @@ const App = () => {
     const tokenDisplay = processWsResponseMsg(lastJsonMessage);
     if (tokenDisplay) {
       displayToast(TToastType.TX_INFO, {
-        message: `You have received ${tokenDisplay}`
+        message: `You have received ${tokenDisplay}`,
       });
       loadTokenAmounts({ oraiAddress: address });
     }
   }, [lastJsonMessage]);
 
+  // move to bitcoin-dashboard from start
+  useEffect(() => {
+    navigate("/bitcoin-dashboard?tab=pending_deposits");
+  }, []);
+
   // clear persist storage when update version
   useEffect(() => {
-    const isClearPersistStorage = persistVersion === undefined || persistVersion !== PERSIST_VER;
+    const isClearPersistStorage =
+      persistVersion === undefined || persistVersion !== PERSIST_VER;
     const clearPersistStorage = () => {
       persistor.pause();
       persistor.flush().then(() => {
@@ -110,34 +123,20 @@ const App = () => {
   useEffect(() => {
     (async () => {
       if (isMobile()) {
-        window.addEventListener('keplr_keystorechange', keplrHandler);
+        window.addEventListener("keplr_keystorechange", keplrHandler);
       }
     })();
     return () => {
-      window.removeEventListener('keplr_keystorechange', keplrHandler);
+      window.removeEventListener("keplr_keystorechange", keplrHandler);
     };
   }, [walletTypeStore]);
-
-  const keplrGasPriceCheck = async () => {
-    try {
-      const gasPrice = await getNetworkGasPrice(network.chainId);
-      if (!gasPrice) {
-        displayToast(TToastType.TX_INFO, {
-          message: `In order to update new fee settings, you need to remove Oraichain network and refresh OraiDEX to re-add the network.`,
-          customLink: 'https://www.youtube.com/watch?v=QMqCVUfxDAk'
-        });
-      }
-    } catch (error) {
-      console.log('Error keplrGasPriceCheck: ', error);
-    }
-  };
 
   const keplrHandler = async () => {
     try {
       let oraiAddress, btcAddress;
 
       if (mobileMode) {
-        window.Keplr = new Keplr('owallet');
+        window.Keplr = new Keplr("owallet");
       }
 
       if (walletByNetworks.cosmos || mobileMode) {
@@ -149,20 +148,20 @@ const App = () => {
         }
       }
 
-      if (walletByNetworks.bitcoin === 'owallet' || mobileMode) {
+      if (walletByNetworks.bitcoin === "owallet" || mobileMode) {
         btcAddress = await window.Bitcoin.getAddress();
         if (btcAddress) setBtcAddress(btcAddress);
       }
 
       loadTokenAmounts({
         oraiAddress,
-        btcAddress
+        btcAddress,
       });
     } catch (error) {
-      console.log('Error: ', error.message);
+      console.log("Error: ", error.message);
       setStatusChangeAccount(false);
       displayToast(TToastType.TX_INFO, {
-        message: `There is an unexpected error with Cosmos wallet. Please try again!`
+        message: `There is an unexpected error with Cosmos wallet. Please try again!`,
       });
     }
   };
@@ -176,7 +175,11 @@ const App = () => {
         <NoticeBanner openBanner={openBanner} setOpenBanner={setOpenBanner} />
         <div className="main">
           <Sidebar />
-          <div className={openBanner ? `bannerWithContent appRight` : 'appRight'}>{routes()}</div>
+          <div
+            className={openBanner ? `bannerWithContent appRight` : "appRight"}
+          >
+            {routes()}
+          </div>
         </div>
       </div>
     </ThemeProvider>

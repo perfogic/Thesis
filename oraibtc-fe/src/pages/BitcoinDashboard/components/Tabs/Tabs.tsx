@@ -8,6 +8,7 @@ export enum KeysFilter {
   pending_withdraws = "pending_withdraws",
   checkpoint = "checkpoint",
   analytic = "analytic",
+  escrow = "escrow",
 }
 
 const LIST_FILTERS = [
@@ -26,6 +27,10 @@ const LIST_FILTERS = [
   {
     key: KeysFilter.analytic,
     text: "Analytics",
+  },
+  {
+    key: KeysFilter.escrow,
+    text: "Escrow Stucked BTC",
   },
 ];
 
