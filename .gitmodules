@@ -1,3 +1,4 @@
 [submodule "oraibtc"]
 	path = oraibtc
-	url = https://github.com/oraichain/bitcoin-bridge/tree/thesis
+	url = https://github.com/oraichain/bitcoin-bridge
+	branch = thesis
