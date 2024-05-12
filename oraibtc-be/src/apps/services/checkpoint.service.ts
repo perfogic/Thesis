@@ -1,9 +1,9 @@
 import httpStatus from "http-status";
 import { DuckDbNode } from "../../services/db";
 import HttpException from "../../utils/exceptions/http.exception";
-import { calcDepositFee, calcWithdrawFees } from "utils/oraibtc";
+import { calcDepositFee, calcWithdrawFees } from "../../utils/oraibtc";
 import { DepositFeeChartItem } from "@types";
-import { getScriptPubkey } from "utils/lcd";
+import { getScriptPubkey } from "../../utils/lcd";
 
 const getDepositFeeByDate = async (date: number): Promise<number> => {
   const checkpoints =
