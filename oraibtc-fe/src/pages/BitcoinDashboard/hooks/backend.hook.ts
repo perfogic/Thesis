@@ -19,7 +19,7 @@ const axios = Axios.create({
       threshold: AXIOS_THROTTLE_THRESHOLD,
     })
   ),
-  baseURL: "http://127.0.0.1:8000/api/",
+  baseURL: "http://127.0.0.1:8888/api/",
 });
 
 export const getAllCharts = async ({

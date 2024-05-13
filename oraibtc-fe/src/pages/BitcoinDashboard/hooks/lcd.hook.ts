@@ -35,7 +35,7 @@ const axios = Axios.create({
       threshold: AXIOS_THROTTLE_THRESHOLD,
     })
   ),
-  baseURL: "https://btc.lcd.orai.io",
+  baseURL: "http://139.180.220.229:8100",
 });
 
 const getCheckpointQueue = async (): Promise<CheckpointQueueInterface> => {
