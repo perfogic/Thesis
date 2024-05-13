@@ -2,3 +2,7 @@
 	path = oraibtc
 	url = https://github.com/oraichain/bitcoin-bridge
 	branch = thesis
+[submodule "oraibtc-scan"]
+	path = oraibtc-scan
+	url = https://github.com/perfogic/oraiscan
+	branch = master
