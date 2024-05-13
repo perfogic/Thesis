@@ -1,22 +1,35 @@
-import { OfflineSigner } from '@cosmjs/proto-signing';
-import { ChainInfo, FeeCurrency, Keplr as keplr, Key } from '@keplr-wallet/types';
-import { CosmosChainId, CosmosWallet, NetworkChainId, TokenItemType, WalletType } from '@oraichain/oraidex-common';
-import { isMobile } from '@walletconnect/browser-utils';
-import { displayToast, TToastType } from 'components/Toasts/Toast';
-import { cosmosTokens } from 'config/bridgeTokens';
-import { OraiBTCBridgeNetwork, chainInfos } from 'config/chainInfos';
-import { network } from 'config/networks';
-import { getAddress } from 'helper';
+import { OfflineSigner } from "@cosmjs/proto-signing";
+import {
+  ChainInfo,
+  FeeCurrency,
+  Keplr as keplr,
+  Key,
+} from "@keplr-wallet/types";
+import {
+  CosmosChainId,
+  CosmosWallet,
+  NetworkChainId,
+  TokenItemType,
+  WalletType,
+} from "@oraichain/oraidex-common";
+import { isMobile } from "@walletconnect/browser-utils";
+import { displayToast, TToastType } from "components/Toasts/Toast";
+import { cosmosTokens } from "config/bridgeTokens";
+import { chainInfos } from "config/chainInfos";
+import { network } from "config/networks";
+import { getAddress } from "helper";
 
 export default class Keplr extends CosmosWallet {
   async createCosmosSigner(chainId: CosmosChainId): Promise<OfflineSigner> {
     const keplr = await this.getKeplr();
     if (keplr) return await keplr.getOfflineSignerAuto(chainId);
-    throw new Error('You have to install Cosmos wallet first if you do not use a mnemonic to sign transactions');
+    throw new Error(
+      "You have to install Cosmos wallet first if you do not use a mnemonic to sign transactions"
+    );
   }
 
-  typeWallet: WalletType | 'eip191';
-  constructor(type: WalletType | 'eip191' = 'keplr') {
+  typeWallet: WalletType | "eip191";
+  constructor(type: WalletType | "eip191" = "keplr") {
     super();
     this.typeWallet = type;
   }
@@ -27,9 +40,9 @@ export default class Keplr extends CosmosWallet {
 
   // priority with owallet
   private get keplr(): keplr {
-    if (this.typeWallet === 'owallet') {
+    if (this.typeWallet === "owallet") {
       return window.owallet;
-    } else if (this.typeWallet === 'keplr') {
+    } else if (this.typeWallet === "keplr") {
       return window.keplr;
     }
     return null;
@@ -51,7 +64,9 @@ export default class Keplr extends CosmosWallet {
     if (isEnableKeplr) {
       if (!window.keplr) return;
       // TODO: hotfix add oraiBTC bridge network
-      const chainInfo = [...chainInfos, OraiBTCBridgeNetwork].find((chainInfo) => chainInfo.chainId === chainId);
+      const chainInfo = [...chainInfos].find(
+        (chainInfo) => chainInfo.chainId === chainId
+      );
 
       // do nothing without chainInfo
       if (!chainInfo) return;
@@ -62,12 +77,19 @@ export default class Keplr extends CosmosWallet {
       await this.keplr.enable(chainId);
       if (isMobile()) return;
       const keplrChainInfos = await this.keplr.getChainInfosWithoutEndpoints();
-      const keplrChain = keplrChainInfos.find((keplrChain) => keplrChain.chainId === chainInfo.chainId);
+      const keplrChain = keplrChainInfos.find(
+        (keplrChain) => keplrChain.chainId === chainInfo.chainId
+      );
       if (!keplrChain) return;
 
-      const findFeeCurrencies = keplrChain.feeCurrencies.find((fee) => fee.gasPriceStep);
+      const findFeeCurrencies = keplrChain.feeCurrencies.find(
+        (fee) => fee.gasPriceStep
+      );
       // check to update newest chain info
-      if (keplrChain.bip44.coinType !== chainInfo.bip44.coinType || !keplrChain.feeCurrencies?.[0]?.gasPriceStep) {
+      if (
+        keplrChain.bip44.coinType !== chainInfo.bip44.coinType ||
+        !keplrChain.feeCurrencies?.[0]?.gasPriceStep
+      ) {
         // displayToast(TToastType.TX_INFO, {
         //   message: `${keplrChain.chainName} has Keplr cointype ${keplrChain.bip44.coinType}, while the chain info config cointype is ${chainInfo.bip44.coinType}. Please reach out to the developers regarding this problem!`
         // });
@@ -81,7 +103,7 @@ export default class Keplr extends CosmosWallet {
       const keplr = await this.getKeplr();
       if (!keplr) {
         return displayToast(TToastType.KEPLR_FAILED, {
-          message: 'You need to install Keplr to continue'
+          message: "You need to install Keplr to continue",
         });
       }
 
@@ -90,19 +112,22 @@ export default class Keplr extends CosmosWallet {
   }
 
   async getKeplr(): Promise<keplrType | undefined> {
-    if (document.readyState === 'complete') {
+    if (document.readyState === "complete") {
       return this.keplr;
     }
 
     return new Promise((resolve) => {
       const documentStateChange = (event: Event) => {
-        if (event.target && (event.target as Document).readyState === 'complete') {
+        if (
+          event.target &&
+          (event.target as Document).readyState === "complete"
+        ) {
           resolve(this.keplr);
-          document.removeEventListener('readystatechange', documentStateChange);
+          document.removeEventListener("readystatechange", documentStateChange);
         }
       };
 
-      document.addEventListener('readystatechange', documentStateChange);
+      document.addEventListener("readystatechange", documentStateChange);
     });
   }
 
@@ -116,7 +141,10 @@ export default class Keplr extends CosmosWallet {
         return keplr.getKey(chainId);
       }
     } catch (error) {
-      console.log('🚀 ~ file: keplr.ts:112 ~ Keplr ~ getKeplrKey ~ error:', error);
+      console.log(
+        "🚀 ~ file: keplr.ts:112 ~ Keplr ~ getKeplrKey ~ error:",
+        error
+      );
     }
   }
 
@@ -125,10 +153,10 @@ export default class Keplr extends CosmosWallet {
     chainId = chainId ?? network.chainId;
     try {
       const isEnableKeplr = await this.getKeplr();
-      if (isEnableKeplr && ['keplr', 'owallet'].includes(this.typeWallet)) {
-        if (!this.keplr) throw new Error('Error: get window cosmos!');
+      if (isEnableKeplr && ["keplr", "owallet"].includes(this.typeWallet)) {
+        if (!this.keplr) throw new Error("Error: get window cosmos!");
         const { bech32Address } = await this.getKeplrKey(chainId);
-        if (!bech32Address) throw Error('Not found address from keplr!');
+        if (!bech32Address) throw Error("Not found address from keplr!");
         return bech32Address;
       }
       return null;

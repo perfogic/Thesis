@@ -9,6 +9,7 @@ import {
 } from "@oraichain/oraidex-common";
 import { PendingDeposit, DepositInfo } from "../@types";
 import { useQuery } from "@tanstack/react-query";
+import { config } from "libs/nomic/config";
 
 const axios = Axios.create({
   timeout: AXIOS_TIMEOUT,
@@ -19,7 +20,7 @@ const axios = Axios.create({
       threshold: AXIOS_THROTTLE_THRESHOLD,
     })
   ),
-  baseURL: "http://139.180.220.229:8999",
+  baseURL: config.relayerUrl,
 });
 
 const getPendingDeposits = async (address?: String): Promise<DepositInfo[]> => {

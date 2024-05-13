@@ -7,12 +7,12 @@ class Config {
   relayerUrl: string;
 
   constructor() {
-    this.chainId = 'oraibtc-mainnet-1';
-    this.chainName = 'OraiBtcMainnet';
-    this.stakingUrl = '';
-    this.rpcUrl = 'https://btc.rpc.orai.io';
-    this.restUrl = 'https://btc.lcd.orai.io';
-    this.relayerUrl = 'https://btc.relayer.orai.io';
+    this.chainId = "oraibtc-testnet-1";
+    this.chainName = "OraiBtcTestnet";
+    this.stakingUrl = "";
+    this.rpcUrl = "https://oraibtc-rpc.perfogic.store";
+    this.restUrl = "https://oraibtc-rest.perfogic.store";
+    this.relayerUrl = "https://oraibtc-relayer.perfogic.store";
   }
 }
 
