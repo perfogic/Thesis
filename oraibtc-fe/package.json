@@ -92,7 +92,7 @@
     "test:ci": "react-app-rewired test --watchAll=false",
     "ts-check": "tsc --noEmit",
     "postinstall": "patch-package",
-    "prepare": "husky install",
+    // "prepare": "husky install",
     "ts-css": "typed-scss-modules src --watch --implementation sass -n all -e default",
     "clear-module-cache": "rm -rf node_modules/.cache/vendor & rm -rf public/vendor*"
   },
