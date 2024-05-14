@@ -376,7 +376,7 @@ export const mapListWithIcon = (
 
 // mapped chain info with icon
 export const chainInfosWithIcon = mapListWithIcon(
-  [...customChainInfos, bitcoinMainnet],
+  [...customChainInfos, bitcoinMainnet, bitcoinTestnet],
   chainIcons,
   "chainId"
 );

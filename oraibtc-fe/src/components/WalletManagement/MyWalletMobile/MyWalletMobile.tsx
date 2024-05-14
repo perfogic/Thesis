@@ -1,44 +1,50 @@
-import { isMobile } from '@walletconnect/browser-utils';
-import { ReactComponent as AddIcon } from 'assets/icons/Add-icon-black-only.svg';
-import { ReactComponent as CopyIcon } from 'assets/icons/copy.svg';
-import { ReactComponent as SuccessIcon } from 'assets/icons/toast_success.svg';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
-import { Button } from 'components/Button';
-import ToggleSwitch from 'components/ToggleSwitch';
-import { type NetworkType } from 'components/WalletManagement/walletConfig';
-import { ThemeContext } from 'context/theme-context';
-import copy from 'copy-to-clipboard';
-import { btcNetworksWithIcon, cosmosNetworksWithIcon } from 'helper';
-import { useCoinGeckoPrices } from 'hooks/useCoingecko';
-import useConfigReducer from 'hooks/useConfigReducer';
-import useOnClickOutside from 'hooks/useOnClickOutside';
-import { getTotalUsd, reduceString } from 'libs/utils';
-import { formatDisplayUsdt } from 'helper';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import type { RootState } from 'store/configure';
-import { ModalDisconnect } from '../ModalDisconnect';
-import styles from './MyWalletMobile.module.scss';
+import { isMobile } from "@walletconnect/browser-utils";
+import { ReactComponent as AddIcon } from "assets/icons/Add-icon-black-only.svg";
+import { ReactComponent as CopyIcon } from "assets/icons/copy.svg";
+import { ReactComponent as SuccessIcon } from "assets/icons/toast_success.svg";
+import { ReactComponent as DefaultIcon } from "assets/icons/tokens.svg";
+import { Button } from "components/Button";
+import ToggleSwitch from "components/ToggleSwitch";
+import { type NetworkType } from "components/WalletManagement/walletConfig";
+import { ThemeContext } from "context/theme-context";
+import copy from "copy-to-clipboard";
+import { btcNetworksWithIcon, cosmosNetworksWithIcon } from "helper";
+import { useCoinGeckoPrices } from "hooks/useCoingecko";
+import useConfigReducer from "hooks/useConfigReducer";
+import useOnClickOutside from "hooks/useOnClickOutside";
+import { getTotalUsd, reduceString } from "libs/utils";
+import { formatDisplayUsdt } from "helper";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "store/configure";
+import { ModalDisconnect } from "../ModalDisconnect";
+import styles from "./MyWalletMobile.module.scss";
 
 export const MyWalletMobile: React.FC<{
   setIsShowMyWallet: (isShow: boolean) => void;
   isShowMyWallet: boolean;
   isShowChooseWallet: boolean;
   setIsShowChooseWallet: (isShowChooseWallet: boolean) => void;
-}> = ({ setIsShowMyWallet, isShowMyWallet, isShowChooseWallet, setIsShowChooseWallet }) => {
+}> = ({
+  setIsShowMyWallet,
+  isShowMyWallet,
+  isShowChooseWallet,
+  setIsShowChooseWallet,
+}) => {
   const { theme, setTheme } = useContext(ThemeContext);
-  const [oraiAddress] = useConfigReducer('address');
-  const [cosmosAddresses] = useConfigReducer('cosmosAddress');
-  const [btcAddress] = useConfigReducer('btcAddress');
+  const [oraiAddress] = useConfigReducer("address");
+  const [cosmosAddresses] = useConfigReducer("cosmosAddress");
+  const [btcAddress] = useConfigReducer("btcAddress");
 
-  const [currentDisconnectingNetwork, setCurrentDisconnectingNetwork] = useState<NetworkType>(null);
+  const [currentDisconnectingNetwork, setCurrentDisconnectingNetwork] =
+    useState<NetworkType>(null);
   const [isShowDisconnect, setIsShowDisconnect] = useState(false);
 
   const amounts = useSelector((state: RootState) => state.token.amounts);
   const { data: prices } = useCoinGeckoPrices();
   const totalUsd = getTotalUsd(amounts, prices);
 
-  const [copiedValue, setCopiedAddressCoordinates] = useState('');
+  const [copiedValue, setCopiedAddressCoordinates] = useState("");
   const [timeoutCopyId, setTimeoutCopyId] = useState<number>(0);
 
   const myWalletRef = useRef(null);
@@ -51,7 +57,7 @@ export const MyWalletMobile: React.FC<{
     if (copiedValue) {
       const TIMEOUT_COPY = 2000;
       const timeoutId = setTimeout(() => {
-        setCopiedAddressCoordinates('');
+        setCopiedAddressCoordinates("");
       }, TIMEOUT_COPY);
 
       setTimeoutCopyId(Number(timeoutId));
@@ -75,12 +81,16 @@ export const MyWalletMobile: React.FC<{
     return (
       <div className={styles.addressByNetworkItem}>
         {cosmosNetworksWithIcon.map((network) => {
-          const chainAddress = cosmosAddresses && cosmosAddresses[network.chainId];
-          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
+          const chainAddress =
+            cosmosAddresses && cosmosAddresses[network.chainId];
+          let NetworkIcon = theme === "dark" ? network.Icon : network.IconLight;
           if (!NetworkIcon) NetworkIcon = DefaultIcon;
 
           return !chainAddress ? null : (
-            <div className={styles.addressByChainInNetwork} key={network.chainId}>
+            <div
+              className={styles.addressByChainInNetwork}
+              key={network.chainId}
+            >
               <div className={styles.left}>
                 <div className={styles.icon}>
                   <div className={styles.iconChain}>
@@ -91,7 +101,10 @@ export const MyWalletMobile: React.FC<{
                   <div className={styles.chainName}>{network.chainName}</div>
                   <div className={styles.chainAddress}>
                     <span>{reduceString(chainAddress, 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => copyWalletAddress(e, chainAddress)}>
+                    <div
+                      className={styles.copyBtn}
+                      onClick={(e) => copyWalletAddress(e, chainAddress)}
+                    >
                       {copiedValue === chainAddress ? (
                         <SuccessIcon width={15} height={15} />
                       ) : (
@@ -114,10 +127,13 @@ export const MyWalletMobile: React.FC<{
     return (
       <div className={styles.addressByNetworkItem}>
         {btcNetworksWithIcon.map((network) => {
-          let NetworkIcon = theme === 'dark' ? network.Icon : network.IconLight;
+          let NetworkIcon = theme === "dark" ? network.Icon : network.IconLight;
           if (!NetworkIcon) NetworkIcon = DefaultIcon;
           return (
-            <div key={network.chainId} className={styles.addressByChainInNetwork}>
+            <div
+              key={network.chainId}
+              className={styles.addressByChainInNetwork}
+            >
               <div className={styles.left}>
                 <div className={styles.icon}>
                   <div className={styles.iconChain}>
@@ -128,7 +144,10 @@ export const MyWalletMobile: React.FC<{
                   <div className={styles.chainName}>{network.chainName}</div>
                   <div className={styles.chainAddress}>
                     <span>{reduceString(btcAddress, 6, 6)}</span>
-                    <div className={styles.copyBtn} onClick={(e) => copyWalletAddress(e, btcAddress)}>
+                    <div
+                      className={styles.copyBtn}
+                      onClick={(e) => copyWalletAddress(e, btcAddress)}
+                    >
                       {copiedValue === btcAddress ? (
                         <SuccessIcon width={15} height={15} />
                       ) : (
@@ -148,7 +167,9 @@ export const MyWalletMobile: React.FC<{
   return (
     <div
       ref={myWalletRef}
-      className={`${styles.myWallets} ${styles[theme]} ${isShowMyWallet ? styles.open : styles.close}`}
+      className={`${styles.myWallets} ${styles[theme]} ${
+        isShowMyWallet ? styles.open : styles.close
+      }`}
     >
       {isShowDisconnect && (
         <ModalDisconnect
@@ -186,9 +207,9 @@ export const MyWalletMobile: React.FC<{
             <ToggleSwitch
               small={true}
               id="toggle-mode"
-              checked={theme === 'dark'}
+              checked={theme === "dark"}
               onChange={() => {
-                setTheme(theme === 'dark' ? 'light' : 'dark');
+                setTheme(theme === "dark" ? "light" : "dark");
               }}
             />
           </div>

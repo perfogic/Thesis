@@ -1,4 +1,9 @@
-import { DeliverTxResponse, isDeliverTxFailure } from "@cosmjs/stargate";
+import {
+  DeliverTxResponse,
+  GasPrice,
+  isDeliverTxFailure,
+  SigningStargateClient,
+} from "@cosmjs/stargate";
 import {
   KWT_SCAN,
   NetworkChainId,
@@ -7,6 +12,7 @@ import {
   CosmosChainId,
   flattenTokens,
   getTokenOnOraichain,
+  calculateTimeoutTimestamp,
 } from "@oraichain/oraidex-common";
 import {
   UniversalSwapHandler,
@@ -30,6 +36,7 @@ import {
   networks,
   handleCheckAddress,
   getSpecialCoingecko,
+  getNetworkGasPrice,
 } from "helper";
 import { useCoinGeckoPrices } from "hooks/useCoingecko";
 import useConfigReducer from "hooks/useConfigReducer";
@@ -85,6 +92,11 @@ import { bitcoinChainId } from "helper/constants";
 import { config } from "libs/nomic/config";
 import useWalletReducer from "hooks/useWalletReducer";
 import { isMobile } from "@walletconnect/browser-utils";
+import { collectWallet } from "libs/cosmjs";
+import { deriveNomicAddress } from "@oraichain/orai-bitcoin";
+import { OraiToken } from "config/chainInfos";
+import { ethers } from "ethers";
+import Long from "long";
 
 interface BalanceProps {}
 
@@ -358,22 +370,32 @@ const Balance: React.FC<BalanceProps> = () => {
     if (!destinationAddress)
       throw Error("Not found your oraibtc-subnet address!");
     try {
-      const result = await window.client.execute(
-        oraiAddress,
-        OBTCContractAddress,
-        {
-          send: {
-            contract: OraichainChain.source.port.split(".")[1],
-            amount,
-            msg: toBinary({
-              local_channel_id: OraichainChain.source.channelId,
-              remote_address: destinationAddress,
-              remote_denom: OraichainChain.source.nBtcIbcDenom,
-              timeout: DEFAULT_TIMEOUT,
-              memo: `withdraw:${btcAddr}`,
-            }),
+      const timeoutTimestampSeconds = Math.floor(
+        (Date.now() + 60 * 60 * 1000) / 1000
+      );
+      const timeoutTimestampNanoseconds = Long.fromNumber(
+        timeoutTimestampSeconds
+      ).multiply(1000000000);
+
+      const transferMsg = {
+        typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
+        value: {
+          sourcePort: "transfer",
+          sourceChannel: "channel-238",
+          sender: oraiAddress,
+          receiver: deriveNomicAddress(oraiAddress),
+          token: {
+            amount: ethers.utils.parseUnits(amount.toString(), 8).toString(),
+            denom: OraichainChain.source.nBtcIbcDenom,
           },
+          timeoutTimestamp: timeoutTimestampNanoseconds,
+          memo: `withdraw:${btcAddr}`,
         },
+      };
+
+      const result = await window.client.signAndBroadcast(
+        oraiAddress,
+        [transferMsg],
         "auto"
       );
 
@@ -658,7 +680,6 @@ const Balance: React.FC<BalanceProps> = () => {
               {getFilterTokens(filterNetworkUI).map((t: TokenItemType) => {
                 // check balance cw20
                 let amount = BigInt(amounts[t.denom] ?? 0);
-                console.log(amount, t.denom);
                 let usd = getUsd(amount, t, prices);
                 let subAmounts: AmountDetails;
                 if (t.contractAddress && t.evmDenoms) {

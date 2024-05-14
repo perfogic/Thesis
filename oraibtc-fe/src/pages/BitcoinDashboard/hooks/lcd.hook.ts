@@ -26,6 +26,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { convertScriptPubkeyToBtcAddress } from "../utils/bitcoin";
 import { config } from "libs/nomic/config";
+import { btcNetwork } from "helper/constants";
 
 const axios = Axios.create({
   timeout: AXIOS_TIMEOUT,
