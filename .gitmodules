@@ -9,4 +9,4 @@
 [submodule "oraibtc-monitoring"]
 	path = ibc-monitoring
 	url = https://github.com/perfogic/ibc-monitoring
-	branch = master
+	branch = main
