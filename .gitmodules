@@ -7,6 +7,6 @@
 	url = https://github.com/perfogic/oraiscan
 	branch = master
 [submodule "oraibtc-monitoring"]
-	path = ibc-monitoring
+	path = oraibtc-monitoring
 	url = https://github.com/perfogic/ibc-monitoring
 	branch = main
