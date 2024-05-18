@@ -162,8 +162,8 @@ export const bitcoinTestnet: CustomChainInfo = {
   features: ["isBtc"],
   txExplorer: {
     name: "BlockStream",
-    txUrl: "https://blockstream.info/tx/{txHash}",
-    accountUrl: "https://blockstream.info/address/{address}",
+    txUrl: "https://blockstream.info/testnet/tx/{txHash}",
+    accountUrl: "https://blockstream.info/testnet/address/{address}",
   },
 };
 export const tokensIcon: TokenIcon[] = [

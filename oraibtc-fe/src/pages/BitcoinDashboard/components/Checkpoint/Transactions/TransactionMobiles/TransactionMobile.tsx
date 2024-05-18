@@ -1,9 +1,9 @@
-import React from 'react';
-import styles from './TransactionMobile.module.scss';
-import { toDisplay } from '@oraichain/oraidex-common';
-import { sortAddress } from 'pages/BitcoinDashboard/utils/bitcoin';
-import RenderIf from 'pages/BitcoinDashboard/components/RenderIf/RenderIf';
-import { isNull } from 'pages/BitcoinDashboard/utils/validate';
+import React from "react";
+import styles from "./TransactionMobile.module.scss";
+import { toDisplay } from "@oraichain/oraidex-common";
+import { sortAddress } from "pages/BitcoinDashboard/utils/bitcoin";
+import RenderIf from "pages/BitcoinDashboard/components/RenderIf/RenderIf";
+import { isNull } from "pages/BitcoinDashboard/utils/validate";
 
 export interface TransactionInfo {
   txid?: String;
@@ -20,13 +20,23 @@ export interface ListTransactionsMobileInterface {
   transactions?: TransactionInfo[];
 }
 
-const TransactionMobileItem: React.FC<TransactionInfo> = ({ txid, value, address, amount, vout, confirmations }) => {
+const TransactionMobileItem: React.FC<TransactionInfo> = ({
+  txid,
+  value,
+  address,
+  amount,
+  vout,
+  confirmations,
+}) => {
   const handleTxNavigate = (txid: String) => {
-    window.open(`https://blockstream.info/tx/${txid}`, '_blank');
+    window.open(`https://blockstream.info/testnet/tx/${txid}`, "_blank");
   };
 
   const handleAddressNavigate = (address: String) => {
-    window.open(`https://blockstream.info/address/${address}`, '_blank');
+    window.open(
+      `https://blockstream.info/testnet/address/${address}`,
+      "_blank"
+    );
   };
 
   return (
@@ -34,13 +44,13 @@ const TransactionMobileItem: React.FC<TransactionInfo> = ({ txid, value, address
       {!isNull(txid) && (
         <div onClick={() => handleTxNavigate(txid)}>
           <div className={styles.title}>Txid</div>
-          <span className={styles.value}>{sortAddress(txid || '')}</span>
+          <span className={styles.value}>{sortAddress(txid || "")}</span>
         </div>
       )}
       {!isNull(address) && (
         <div onClick={() => handleAddressNavigate(address)}>
           <div className={styles.title}>Address</div>
-          <span className={styles.value}>{sortAddress(address || '')}</span>
+          <span className={styles.value}>{sortAddress(address || "")}</span>
         </div>
       )}
       {!isNull(vout) && (
@@ -52,7 +62,9 @@ const TransactionMobileItem: React.FC<TransactionInfo> = ({ txid, value, address
       {(!isNull(amount) || !isNull(value)) && (
         <div>
           <div className={styles.title}>Amount</div>
-          <span className={styles.value}>{toDisplay(BigInt(amount || value || 0), 8)} BTC</span>
+          <span className={styles.value}>
+            {toDisplay(BigInt(amount || value || 0), 8)} BTC
+          </span>
         </div>
       )}
       {!isNull(confirmations) && (
@@ -65,7 +77,11 @@ const TransactionMobileItem: React.FC<TransactionInfo> = ({ txid, value, address
   );
 };
 
-const TransactionsMobile: React.FC<ListTransactionsMobileInterface> = ({ generateIcon, symbols, transactions }) => {
+const TransactionsMobile: React.FC<ListTransactionsMobileInterface> = ({
+  generateIcon,
+  symbols,
+  transactions,
+}) => {
   return (
     <div className={styles.transaction_mobiles}>
       {transactions.map((item, idx) => {

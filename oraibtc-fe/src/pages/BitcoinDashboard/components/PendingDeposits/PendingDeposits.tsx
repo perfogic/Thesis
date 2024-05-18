@@ -77,7 +77,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   };
 
   const handleNavigate = (txid: String) => {
-    window.open(`https://blockstream.info/tx/${txid}`, "_blank");
+    window.open(`https://blockstream.info/testnet/tx/${txid}`, "_blank");
   };
 
   const isExitsDeposit = (

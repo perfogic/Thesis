@@ -1,16 +1,16 @@
-import { toDisplay } from '@oraichain/oraidex-common';
-import { FallbackEmptyData } from 'components/FallbackEmptyData';
-import { Table, TableHeaderProps } from 'components/Table';
-import useConfigReducer from 'hooks/useConfigReducer';
-import styles from './Transaction.module.scss';
-import { ReactComponent as DefaultIcon } from 'assets/icons/tokens.svg';
-import { ReactComponent as BitcoinIcon } from 'assets/icons/bitcoin.svg';
-import { ReactComponent as OraiDarkIcon } from 'assets/icons/oraichain.svg';
-import { ReactComponent as OraiLightIcon } from 'assets/icons/oraichain_light.svg';
-import { TransactionParsedOutput } from 'pages/BitcoinDashboard/@types';
-import { isMobile } from '@walletconnect/browser-utils';
-import RenderIf from '../../RenderIf/RenderIf';
-import TransactionsMobile from './TransactionMobiles/TransactionMobile';
+import { toDisplay } from "@oraichain/oraidex-common";
+import { FallbackEmptyData } from "components/FallbackEmptyData";
+import { Table, TableHeaderProps } from "components/Table";
+import useConfigReducer from "hooks/useConfigReducer";
+import styles from "./Transaction.module.scss";
+import { ReactComponent as DefaultIcon } from "assets/icons/tokens.svg";
+import { ReactComponent as BitcoinIcon } from "assets/icons/bitcoin.svg";
+import { ReactComponent as OraiDarkIcon } from "assets/icons/oraichain.svg";
+import { ReactComponent as OraiLightIcon } from "assets/icons/oraichain_light.svg";
+import { TransactionParsedOutput } from "pages/BitcoinDashboard/@types";
+import { isMobile } from "@walletconnect/browser-utils";
+import RenderIf from "../../RenderIf/RenderIf";
+import TransactionsMobile from "./TransactionMobiles/TransactionMobile";
 
 type Icons = {
   Light: any;
@@ -20,23 +20,27 @@ type Icons = {
 const tokens = {
   bitcoin: {
     Light: BitcoinIcon,
-    Dark: BitcoinIcon
+    Dark: BitcoinIcon,
   } as Icons,
   oraichain: {
     Light: OraiLightIcon,
-    Dark: OraiDarkIcon
-  } as Icons
+    Dark: OraiDarkIcon,
+  } as Icons,
 };
 
-export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = ({ data }) => {
-  const [theme] = useConfigReducer('theme');
+export const TransactionOutput: React.FC<{
+  data: TransactionParsedOutput[];
+}> = ({ data }) => {
+  const [theme] = useConfigReducer("theme");
   const mobile = isMobile();
 
   const generateIcon = (baseToken: Icons, quoteToken: Icons): JSX.Element => {
     let [BaseTokenIcon, QuoteTokenIcon] = [DefaultIcon, DefaultIcon];
 
-    if (baseToken) BaseTokenIcon = theme === 'light' ? baseToken.Light : baseToken.Dark;
-    if (quoteToken) QuoteTokenIcon = theme === 'light' ? quoteToken.Light : quoteToken.Dark;
+    if (baseToken)
+      BaseTokenIcon = theme === "light" ? baseToken.Light : baseToken.Dark;
+    if (quoteToken)
+      QuoteTokenIcon = theme === "light" ? quoteToken.Light : quoteToken.Dark;
 
     return (
       <div className={styles.symbols}>
@@ -47,38 +51,42 @@ export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = 
   };
 
   const handleNavigate = (txid: String) => {
-    window.open(`https://blockstream.info/address/${txid}`, '_blank');
+    window.open(`https://blockstream.info/testnet/address/${txid}`, "_blank");
   };
 
   const headers: TableHeaderProps<TransactionParsedOutput> = {
     flow: {
-      name: 'Flow',
+      name: "Flow",
       accessor: (_) => (
         <div className={styles.symbols}>
-          <div className={styles.symbols_logo}>{generateIcon(tokens.oraichain, tokens.bitcoin)}</div>
+          <div className={styles.symbols_logo}>
+            {generateIcon(tokens.oraichain, tokens.bitcoin)}
+          </div>
         </div>
       ),
-      width: '12%',
-      align: 'left'
+      width: "12%",
+      align: "left",
     },
     address: {
-      name: 'Address',
-      width: '60%',
+      name: "Address",
+      width: "60%",
       accessor: (data) => (
         <div onClick={() => handleNavigate(data.address)}>
           <span>{`${data.address}`}</span>
         </div>
       ),
-      sortField: 'address',
-      align: 'left'
+      sortField: "address",
+      align: "left",
     },
     amount: {
-      name: 'Amount',
-      width: '21%',
-      align: 'right',
-      sortField: 'value',
-      accessor: (data) => <span>{toDisplay(BigInt(data.value || 0), 8)} BTC</span>
-    }
+      name: "Amount",
+      width: "21%",
+      align: "right",
+      sortField: "value",
+      accessor: (data) => (
+        <span>{toDisplay(BigInt(data.value || 0), 8)} BTC</span>
+      ),
+    },
   };
   const checkRenderUI = () => {
     if (data?.length > 0) {
@@ -86,7 +94,7 @@ export const TransactionOutput: React.FC<{ data: TransactionParsedOutput[] }> = 
         return (
           <TransactionsMobile
             generateIcon={() => generateIcon(tokens.oraichain, tokens.bitcoin)}
-            symbols={'ORAI/BTC'}
+            symbols={"ORAI/BTC"}
             transactions={data}
           />
         );

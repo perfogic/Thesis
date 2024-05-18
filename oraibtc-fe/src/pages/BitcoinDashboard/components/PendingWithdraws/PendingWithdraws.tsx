@@ -89,7 +89,7 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
   };
 
   const handleNavigate = (txid: String) => {
-    window.open(`https://blockstream.info/address/${txid}`, "_blank");
+    window.open(`https://blockstream.info/testnet/address/${txid}`, "_blank");
   };
 
   const headers: TableHeaderProps<TransactionParsedOutput> = {
