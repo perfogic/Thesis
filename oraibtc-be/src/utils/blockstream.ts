@@ -17,7 +17,7 @@ const axios = Axios.create({
       threshold: AXIOS_THROTTLE_THRESHOLD,
     })
   ),
-  baseURL: "https://blockstream.info/api/",
+  baseURL: "https://blockstream.info/testnet/api/",
 });
 
 export const getValueLocked = async (
