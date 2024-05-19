@@ -129,7 +129,6 @@ const monitorReportHandler = async () => {
         consensusState.consensus_state.timestamp
       ).getTime();
       const currentTimestamp = new Date().getTime();
-      console.log(currentTimestamp, timestamp);
 
       notifyMessage += `\n`;
 

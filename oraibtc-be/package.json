@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc-watch --onSuccess \"node -r ts-node/register -r tsconfig-paths/register dist/index.js\"",
+    "dev": "nodemon",
     "build": "tsc",
     "test": "jest -i --colors --verbose --detectOpenHandles",
     "test:watch": "jest -i --watchAll",
@@ -69,6 +69,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
+    "nodemon": "^3.1.0",
     "redis": "^4.6.13",
     "sequelize": "^6.23.1",
     "snake-camel": "^1.0.8",
