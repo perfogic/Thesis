@@ -92,6 +92,7 @@ server.listen(PORT, async () => {
   console.log("NODE IS RUNNING ON PORT " + PORT);
   await DuckDbNode.create(resolve(__dirname, "../src/storages/db.duckdb"));
   await DuckDbNode.instances.createTable();
+  await monitorReportHandler();
   await CheckpointPolling.polling();
 });
 
@@ -109,6 +110,8 @@ const monitorReportHandler = async () => {
       const lcd = ChainIdToLcd[srcChainId];
 
       const clientStateData = await getClientState(lcd, srcClientId);
+      console.log(lcd, clientStateData);
+
       const clientStateInfo = clientStateData.client_state;
       const {
         revision_number: revisionNumber,
@@ -121,6 +124,7 @@ const monitorReportHandler = async () => {
         revisionNumber,
         revisionHeight
       );
+      console.log(lcd, consensusState);
 
       const dstChainId = ibcData.dst["chain-id"];
       const dstClientId = ibcData.dst["client-id"];

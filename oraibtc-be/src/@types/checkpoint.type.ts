@@ -44,6 +44,13 @@ export interface CheckpointDataInterface {
   status: CheckpointStatus;
 }
 
+export interface AdditionalCheckpointDataInterface {
+  valueLocked: number;
+  checkpointIndex: number;
+  createTime: number;
+  feeCollected: number;
+}
+
 interface CheckpointConfig {
   emergencyDisbursalLockTimeInterval: number;
   emergencyDisbursalMaxTxSize: number;
@@ -62,11 +69,8 @@ interface CheckpointConfig {
 }
 
 export interface StoredCheckpointDataInterface
-  extends Omit<CheckpointDataInterface, "feesCollected"> {
-  checkpointIndex: number;
-  createTime: number;
-  feeCollected: number;
-}
+  extends Omit<CheckpointDataInterface, "feesCollected">,
+    AdditionalCheckpointDataInterface {}
 
 export interface CheckpointQueueInterface {
   index: number;

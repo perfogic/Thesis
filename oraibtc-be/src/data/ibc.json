@@ -1,12 +1,12 @@
 [
   {
     "src": {
-      "chain-id": "oraibtc-testnet-1",
-      "client-id": "07-tendermint-3"
-    },
-    "dst": {
       "chain-id": "Oraichain",
       "client-id": "07-tendermint-203"
+    },
+    "dst": {
+      "chain-id": "oraibtc-testnet-1",
+      "client-id": "07-tendermint-3"
     }
   },
   {
