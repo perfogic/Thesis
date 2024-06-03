@@ -13,6 +13,12 @@ const envVarsSchema = Joi.object()
     RELAYER_URL: Joi.string().required().description("Relayer Url"),
     LCD_URL: Joi.string().required().description("Lcd Url"),
     POLLING_INTERVAL: Joi.number().required().description("Polling Interval"),
+    FIRST_CHECKPOINT_INDEX: Joi.number()
+      .required()
+      .description("First Checkpoint Index"),
+    FIRST_BLOCK_HEIGHT: Joi.number()
+      .required()
+      .description("First Block Height"),
   })
   .unknown();
 
@@ -39,5 +45,9 @@ export default {
   checkpoint: {
     pollingInterval: envVars.POLLING_INTERVAL,
     firstCheckpointIndex: envVars.FIRST_CHECKPOINT_INDEX,
+  },
+  block: {
+    pollingInterval: envVars.POLLING_INTERVAL * 10,
+    firstBlockHeight: envVars.FIRST_BLOCK_HEIGHT,
   },
 };

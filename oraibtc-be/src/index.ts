@@ -12,11 +12,13 @@ import env from "./configs/env";
 import { DuckDbNode } from "./services/db";
 import { CheckpointPolling } from "./services/checkpoint";
 import checkpointRoute from "./routes/checkpoint.route";
+import blockRoute from "./routes/block.route";
 import { ChainIdToLcd, DiscordConfig, ONE_DAY } from "./utils/constants";
 import { getClientState, getConsensusState } from "./utils/ibc";
 import { WebhookClient } from "discord.js";
 import IbcData from "./data/ibc.json";
 import cron from "node-cron";
+import { BlockPolling } from "services/block";
 
 const app = express();
 const server = http.createServer(app);
@@ -69,6 +71,7 @@ const PORT = env.port || 8000;
  *  create_time: number
  */
 
+app.use("/api/block", blockRoute);
 app.use("/api/checkpoint", checkpointRoute);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -92,8 +95,7 @@ server.listen(PORT, async () => {
   console.log("NODE IS RUNNING ON PORT " + PORT);
   await DuckDbNode.create(resolve(__dirname, "../src/storages/db.duckdb"));
   await DuckDbNode.instances.createTable();
-  await monitorReportHandler();
-  await CheckpointPolling.polling();
+  await Promise.all([CheckpointPolling.polling(), BlockPolling.polling()]);
 });
 
 const monitorReportHandler = async () => {

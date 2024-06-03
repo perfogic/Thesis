@@ -9,6 +9,7 @@ import fs from "fs";
 import { toObject } from "@oraichain/oraidex-common";
 import { toCamel } from "snake-camel";
 import _ from "lodash";
+import { BlockData } from "../@types/block.type";
 
 export const sqlCommands = {
   create: {
@@ -24,6 +25,22 @@ export const sqlCommands = {
       config VARCHAR,
       valueLocked BIGINT,
       createTime BIGINT
+    )`,
+    [TableName.Block]: `CREATE TABLE IF NOT EXISTS Block 
+    (
+      id VARCHAR PRIMARY KEY,
+      height UINTEGER,
+      version BIGINT,
+      timestamp BIGINT,
+      txCount BIGINT,
+      size UINTEGER,
+      weight UINTEGER,
+      merkleRoot VARCHAR,
+      previousblockhash VARCHAR,
+      mediantime BIGINT,
+      nonce BIGINT,
+      bits BIGINT,
+      difficulty UINTEGER,
     )`,
   },
   query: {
@@ -46,6 +63,10 @@ export const sqlCommands = {
       order: QueryOrderEnum = QueryOrderEnum.DESC
     ) =>
       `SELECT * from Checkpoint WHERE createTime <= ${endTime} AND createTime >= ${startTime} ORDER BY createTime ${order}`,
+    getLatestBlock: (
+      limit: number = 1,
+      order: QueryOrderEnum = QueryOrderEnum.DESC
+    ) => `SELECT * from Block  ORDER BY timestamp ${order} LIMIT ${limit}`,
   },
 };
 
@@ -204,6 +225,19 @@ export class DuckDbNode extends DuckDB {
           config: toCamel(JSON.parse(item.config.toString())),
         };
       });
+    }
+    return [];
+  }
+
+  async getLatestBlock(
+    limit: number = 1,
+    order: QueryOrderEnum = QueryOrderEnum.DESC
+  ): Promise<BlockData[]> {
+    const result = await this.conn.all(
+      sqlCommands.query.getLatestBlock(limit, order)
+    );
+    if (result.length > 0) {
+      return result as any;
     }
     return [];
   }
