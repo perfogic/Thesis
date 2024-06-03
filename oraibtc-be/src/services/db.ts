@@ -256,6 +256,11 @@ export class DuckDbNode extends DuckDB {
     const result = await this.conn.all(
       sqlCommands.query.getLatestBlocksWithGap(gap, limit, order)
     );
+    console.log(
+      sqlCommands.query.getLatestBlocksWithGap(gap, limit, order),
+      "Reuslt",
+      result
+    );
     if (result.length > 0) {
       return result as any;
     }

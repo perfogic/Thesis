@@ -1,15 +1,16 @@
 import { DuckDbNode } from "services/db";
 
 const getAllCharts = async ({}): Promise<any> => {
-  let gap = 9;
-  const blocks = await DuckDbNode.instances.getLatestBlocksWithGap(gap);
+  let gap = 6;
+  const blocks = await DuckDbNode.instances.getLatestBlocksWithGap(gap, 1000);
+  console.log(blocks);
   const blockTime = blocks
     .filter((_, index) => index < blocks.length - 1)
     .map((item, index) => {
       return {
         time: item.timestamp,
         value: Math.floor(
-          (blocks[index + 1].timestamp - item.timestamp) / 60 / gap
+          -(blocks[index + 1].timestamp - item.timestamp) / 60 / gap
         ),
       };
     })
