@@ -7,7 +7,10 @@ import {
   AXIOS_TIMEOUT,
   AXIOS_THROTTLE_THRESHOLD,
 } from "@oraichain/oraidex-common";
-import { AllChartsData } from "../@types/Analytics.types";
+import {
+  AllBlockChartsData,
+  AllCheckpointChartsData,
+} from "../@types/Analytics.types";
 import { useQuery } from "@tanstack/react-query";
 
 const axios = Axios.create({
@@ -22,7 +25,7 @@ const axios = Axios.create({
   baseURL: "https://api.perfogic.store/api/",
 });
 
-export const getAllCharts = async ({
+export const getAllCheckpointCharts = async ({
   startTime,
   endTime,
   address,
@@ -30,7 +33,7 @@ export const getAllCharts = async ({
   startTime: number;
   endTime: number;
   address: string;
-}): Promise<AllChartsData> => {
+}): Promise<AllCheckpointChartsData> => {
   try {
     const res = await axios.get("/checkpoint/all_charts", {
       params: {
@@ -51,7 +54,24 @@ export const getAllCharts = async ({
   }
 };
 
-export const useGetAllCharts = ({
+export const getAllBlockCharts =
+  async ({}: {}): Promise<AllBlockChartsData> => {
+    try {
+      const res = await axios.get("/block/all_charts", {
+        params: {},
+      });
+      return res.data?.data;
+    } catch (e) {
+      console.error("getAllBlockCharts", e);
+      return {
+        blockSize: [],
+        blockTime: [],
+        blockTxsCount: [],
+      };
+    }
+  };
+
+export const useGetAllCheckpointCharts = ({
   startTime,
   endTime,
   address,
@@ -63,7 +83,21 @@ export const useGetAllCharts = ({
   const { data } = useQuery(
     ["all-charts", startTime, endTime, address],
     () => {
-      return getAllCharts({ startTime, endTime, address });
+      return getAllCheckpointCharts({ startTime, endTime, address });
+    },
+    {
+      refetchOnWindowFocus: true,
+      staleTime: 30 * 1000,
+    }
+  );
+  return data;
+};
+
+export const useGetAllBlockCharts = ({}: {}) => {
+  const { data } = useQuery(
+    ["all-block-charts"],
+    () => {
+      return getAllBlockCharts({});
     },
     {
       refetchOnWindowFocus: true,

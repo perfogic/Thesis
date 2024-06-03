@@ -1,5 +1,8 @@
 import React from "react";
-import { useGetAllCharts } from "pages/BitcoinDashboard/hooks/backend.hook";
+import {
+  useGetAllCheckpointCharts,
+  useGetAllBlockCharts,
+} from "pages/BitcoinDashboard/hooks/backend.hook";
 import useConfigReducer from "hooks/useConfigReducer";
 import { Chart } from "./Chart";
 import { formatUTCDateString } from "helper/format";
@@ -8,19 +11,19 @@ import styles from "./index.module.scss";
 
 const Analytics: React.FC<{}> = () => {
   const btcAddress = useConfigReducer("btcAddress");
-  const data = useGetAllCharts({
+  const checkpointData = useGetAllCheckpointCharts({
     startTime: 0,
     endTime: Math.floor(new Date().getTime() / 1000),
     address: btcAddress[0],
   });
-  console.log("Word", data);
+  const blockData = useGetAllBlockCharts({});
   return (
     <div>
       <div className={styles.grid}>
         <Chart
           height={300}
           title="Fee Rate"
-          data={data?.feeRate || []}
+          data={checkpointData?.feeRate || []}
           tooltipConfig={{
             title: "Fee Rate",
             formatTimeFunc: formatUTCDateString,
@@ -33,7 +36,7 @@ const Analytics: React.FC<{}> = () => {
         <Chart
           height={300}
           title="Total BTC Locked"
-          data={data?.valueLocked || []}
+          data={checkpointData?.valueLocked || []}
           tooltipConfig={{
             title: "BTC Locked",
             formatTimeFunc: formatUTCDateString,
@@ -50,7 +53,7 @@ const Analytics: React.FC<{}> = () => {
         <Chart
           height={300}
           title="Deposit Fee"
-          data={data?.deposit || []}
+          data={checkpointData?.deposit || []}
           tooltipConfig={{
             title: "Deposit Fee",
             formatTimeFunc: formatUTCDateString,
@@ -64,12 +67,28 @@ const Analytics: React.FC<{}> = () => {
         <Chart
           height={300}
           title="Withdrawal Fee"
-          data={data?.withdraw || []}
+          data={checkpointData?.withdraw || []}
           tooltipConfig={{
             title: "Withdrawal Fee",
             formatTimeFunc: formatUTCDateString,
             formatValueFunc: (price) =>
               toDisplay(BigInt(Math.floor(price) || 0), 14, 8) + " BTC",
+          }}
+          priceFormatter={(price) => {
+            return toDisplay(BigInt(Math.floor(price) || 0), 14, 8);
+          }}
+        />
+      </div>
+
+      <div>
+        <Chart
+          height={300}
+          title="Block Time"
+          data={blockData?.blockTime || []}
+          tooltipConfig={{
+            title: "Block Time",
+            formatTimeFunc: formatUTCDateString,
+            formatValueFunc: (price) => price + " minutes",
           }}
           priceFormatter={(price) => {
             return toDisplay(BigInt(Math.floor(price) || 0), 14, 8);

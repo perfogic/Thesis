@@ -3,9 +3,15 @@ export interface TimeSlotData {
   value: number;
 }
 
-export interface AllChartsData {
+export interface AllCheckpointChartsData {
   deposit: TimeSlotData[];
   withdraw: TimeSlotData[];
   feeRate: TimeSlotData[];
   valueLocked: TimeSlotData[];
+}
+
+export interface AllBlockChartsData {
+  blockTime: TimeSlotData[];
+  blockSize: TimeSlotData[];
+  blockTxsCount: TimeSlotData[];
 }
