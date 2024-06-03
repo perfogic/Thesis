@@ -67,6 +67,12 @@ export const sqlCommands = {
       limit: number = 1,
       order: QueryOrderEnum = QueryOrderEnum.DESC
     ) => `SELECT * from Block  ORDER BY timestamp ${order} LIMIT ${limit}`,
+    getLatestBlocksWithGap: (
+      gap: number = 6,
+      limit: number = 1,
+      order: QueryOrderEnum = QueryOrderEnum.DESC
+    ) =>
+      `SELECT * from Block WHERE height % ${gap} = 0 ORDER BY timestamp ${order} LIMIT ${limit}`,
   },
 };
 
@@ -235,6 +241,20 @@ export class DuckDbNode extends DuckDB {
   ): Promise<BlockData[]> {
     const result = await this.conn.all(
       sqlCommands.query.getLatestBlock(limit, order)
+    );
+    if (result.length > 0) {
+      return result as any;
+    }
+    return [];
+  }
+
+  async getLatestBlocksWithGap(
+    gap: number = 6,
+    limit: number = 1,
+    order: QueryOrderEnum = QueryOrderEnum.DESC
+  ): Promise<BlockData[]> {
+    const result = await this.conn.all(
+      sqlCommands.query.getLatestBlocksWithGap(gap, limit, order)
     );
     if (result.length > 0) {
       return result as any;
