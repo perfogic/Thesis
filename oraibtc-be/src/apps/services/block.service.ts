@@ -1,7 +1,7 @@
 import { DuckDbNode } from "services/db";
 
 const getAllCharts = async ({}): Promise<any> => {
-  let gap = 100;
+  let gap = 80;
   const blocks = await DuckDbNode.instances.getLatestBlocksWithGap(gap, 1000);
   console.log(blocks);
   const blockTime = blocks
@@ -15,11 +15,14 @@ const getAllCharts = async ({}): Promise<any> => {
       };
     })
     .reverse();
+
   const blockSize = blocks
-    .map((item) => ({
-      time: item.timestamp,
-      value: item.size,
-    }))
+    .map((item) => {
+      return {
+        time: item.timestamp,
+        value: item.size,
+      };
+    })
     .reverse();
   const blockTxsCount = blocks
     .map((item) => ({
