@@ -9,15 +9,20 @@ const getAllCharts = async ({}): Promise<any> => {
         time: item.timestamp,
         value: Math.floor((blocks[index + 1].timestamp - item.timestamp) / 60),
       };
-    });
-  const blockSize = blocks.map((item) => ({
-    time: item.timestamp,
-    value: item.size,
-  }));
-  const blockTxsCount = blocks.map((item) => ({
-    time: item.timestamp,
-    value: item.txCount,
-  }));
+    })
+    .reverse();
+  const blockSize = blocks
+    .map((item) => ({
+      time: item.timestamp,
+      value: item.size,
+    }))
+    .reverse();
+  const blockTxsCount = blocks
+    .map((item) => ({
+      time: item.timestamp,
+      value: item.txCount,
+    }))
+    .reverse();
   return {
     blockTime,
     blockSize,
