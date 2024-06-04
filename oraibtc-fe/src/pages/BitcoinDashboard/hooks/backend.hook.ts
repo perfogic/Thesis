@@ -64,9 +64,7 @@ export const getAllBlockCharts =
     } catch (e) {
       console.error("getAllBlockCharts", e);
       return {
-        blockSize: [],
         blockTime: [],
-        blockTxsCount: [],
       };
     }
   };

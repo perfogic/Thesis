@@ -12,6 +12,4 @@ export interface AllCheckpointChartsData {
 
 export interface AllBlockChartsData {
   blockTime: TimeSlotData[];
-  blockSize: TimeSlotData[];
-  blockTxsCount: TimeSlotData[];
 }
