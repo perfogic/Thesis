@@ -73,6 +73,27 @@ export const sqlCommands = {
       order: QueryOrderEnum = QueryOrderEnum.DESC
     ) =>
       `SELECT * from Block WHERE height % ${gap} = 0 ORDER BY timestamp ${order} LIMIT ${limit}`,
+    getAvgConfirmationTimeByDays: () => `
+        WITH ConfirmationTimes AS (
+          SELECT 
+              timestamp,
+              timestamp - LAG(timestamp) OVER (ORDER BY timestamp) AS confirmation_time
+          FROM Block
+        ),
+        DailyConfirmationTimes AS (
+            SELECT 
+                DATE_TRUNC('day', TO_TIMESTAMP(timestamp)) AS day,
+                confirmation_time
+            FROM ConfirmationTimes
+            WHERE confirmation_time IS NOT NULL
+        )
+        SELECT 
+            day,
+            AVG(confirmation_time) AS avg_confirmation_time
+        FROM DailyConfirmationTimes
+        GROUP BY day
+        ORDER BY day;
+    `,
   },
 };
 
@@ -256,11 +277,22 @@ export class DuckDbNode extends DuckDB {
     const result = await this.conn.all(
       sqlCommands.query.getLatestBlocksWithGap(gap, limit, order)
     );
-    console.log(
-      sqlCommands.query.getLatestBlocksWithGap(gap, limit, order),
-      "Reuslt",
-      result
+    if (result.length > 0) {
+      return result as any;
+    }
+    return [];
+  }
+
+  async getAvgConfirmationTimeByDays(): Promise<
+    {
+      day: number;
+      avg_confirmation_time: number;
+    }[]
+  > {
+    const result = await this.conn.all(
+      sqlCommands.query.getAvgConfirmationTimeByDays()
     );
+
     if (result.length > 0) {
       return result as any;
     }
