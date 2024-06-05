@@ -91,7 +91,7 @@ const Analytics: React.FC<{}> = () => {
             formatValueFunc: (price) => price + " minutes",
           }}
           priceFormatter={(price) => {
-            return toDisplay(BigInt(Math.floor(price) || 0), 14, 8);
+            return price;
           }}
         />
       </div>
