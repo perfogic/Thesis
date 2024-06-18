@@ -4290,20 +4290,20 @@ drbg.js@^1.0.1:
     create-hash "^1.1.2"
     create-hmac "^1.1.4"
 
-duckdb-async@^0.8.1:
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/duckdb-async/-/duckdb-async-0.8.1.tgz#258be141def7c3a1ac594e6b894bdd9d136dd351"
-  integrity sha512-/g5/zxC5XXXeQVEs86AtWVnzOmS7FBgVm976sJ75Tvrovms+QC5V+0SLNOl6VJQUT55NvvlrwX1zQybQfa+48w==
+duckdb-async@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/duckdb-async/-/duckdb-async-1.0.0.tgz#0dd51f03404cec4a1ab0e8fa5941c756479122f4"
+  integrity sha512-1UTAZ2LVk9s4NPMiLnB9L2DI716I/LqtDYL8I7RFEP981/fo0SaqcRQFwtgPPz8MyEPcx8QPPmAWEsal5q68xQ==
   dependencies:
-    duckdb "0.8.1"
+    duckdb "1.0.0"
 
-duckdb@0.8.1:
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/duckdb/-/duckdb-0.8.1.tgz#73b689701e31951e7b2cf04b954188746e7773ef"
-  integrity sha512-a2SJDuvBVKy5muYFxXTANlqdNX1daF3NHzpqRdrk0Qx5n3Sh7BxL66O+WY9epaDFukiXEpz45sds5T1LaPaHog==
+duckdb@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/duckdb/-/duckdb-1.0.0.tgz#de81d9b93311bb816901b582de27ae75fa0e20e2"
+  integrity sha512-QwpcIeN42A2lL19S70mUFibZgRcEcZpCkKHdzDgecHaYZhXj3+1i2cxSDyAk/RVg5CYnqj1Dp4jAuN4cc80udA==
   dependencies:
     "@mapbox/node-pre-gyp" "^1.0.0"
-    node-addon-api "*"
+    node-addon-api "^7.0.0"
     node-gyp "^9.3.0"
 
 duplexer@~0.1.1:
@@ -6639,11 +6639,6 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
-node-addon-api@*:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-8.0.0.tgz#5453b7ad59dd040d12e0f1a97a6fa1c765c5c9d2"
-  integrity sha512-ipO7rsHEBqa9STO5C5T10fj732ml+5kLN1cAG8/jdHd56ldQeGj3Q7+scUS+VHK/qy1zLEwC4wMK5+yM0btPvw==
-
 node-addon-api@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-2.0.2.tgz#432cfa82962ce494b132e9d72a15b29f71ff5d32"
@@ -6653,6 +6648,11 @@ node-addon-api@^5.0.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-5.1.0.tgz#49da1ca055e109a23d537e9de43c09cca21eb762"
   integrity sha512-eh0GgfEkpnoWDq+VY8OyvYhFEzBk6jIYbRKdIlyTiAXIVJ8PyBaKb0rp7oDtoddbdoHWhq8wwr+XZ81F1rpNdA==
+
+node-addon-api@^7.0.0:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-7.1.0.tgz#71f609369379c08e251c558527a107107b5e0fdb"
+  integrity sha512-mNcltoe1R8o7STTegSOHdnJNN7s5EUvhoS7ShnTHDyOSd+8H+UdWODq6qSv67PjC8Zc5JRT8+oLAMCr0SIXw7g==
 
 node-cleanup@^2.1.2:
   version "2.1.2"
