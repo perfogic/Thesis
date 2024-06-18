@@ -25,6 +25,7 @@ import { btcTokens, oraichainTokens } from "config/bridgeTokens";
 import TransactionsMobile from "../Checkpoint/Transactions/TransactionMobiles/TransactionMobile";
 import { isMobile } from "@walletconnect/browser-utils";
 import RenderIf from "../RenderIf/RenderIf";
+import { useGetLatestBlockHeight } from "pages/BitcoinDashboard/hooks/bitcoin.hook";
 
 type Icons = {
   Light: any;
@@ -52,6 +53,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
   const checkpointQueue = useGetCheckpointQueue();
   const buildingCheckpointIndex = checkpointQueue?.index || 0;
   const checkpointData = useGetCheckpointData(buildingCheckpointIndex);
+  const tipHeight = useGetLatestBlockHeight();
   const checkpointPreviousData = useGetCheckpointData(
     buildingCheckpointIndex > 1
       ? buildingCheckpointIndex - 1
@@ -213,7 +215,13 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
       width: "12%",
       align: "right",
       sortField: "confirmations",
-      accessor: (data) => <span>{data.confirmations}</span>,
+      accessor: (data) => {
+        return (
+          <span>
+            {data.height ? tipHeight - data.height + 1 : data.confirmations}
+          </span>
+        );
+      },
     },
   };
   const checkRenderUI = () => {

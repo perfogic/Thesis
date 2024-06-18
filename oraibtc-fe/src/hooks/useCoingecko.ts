@@ -1,8 +1,8 @@
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
-import { cosmosTokens, evmTokens } from 'config/bridgeTokens';
-import useConfigReducer from './useConfigReducer';
-import { CoinGeckoId } from '@oraichain/oraidex-common';
+import type { UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { cosmosTokens, evmTokens } from "config/bridgeTokens";
+import useConfigReducer from "./useConfigReducer";
+import { CoinGeckoId } from "@oraichain/oraidex-common";
 
 /**
  * Constructs the URL to retrieve prices from CoinGecko.
@@ -10,8 +10,10 @@ import { CoinGeckoId } from '@oraichain/oraidex-common';
  * @returns
  */
 export const buildCoinGeckoPricesURL = (tokens: readonly string[]): string =>
-  // `https://api.coingecko.com/api/v3/simple/price?ids=${tokens.join('%2C')}&vs_currencies=usd`;
-  `https://price.market.orai.io/simple/price?ids=${tokens.join('%2C')}&vs_currencies=usd`;
+  `https://api.coingecko.com/api/v3/simple/price?ids=${tokens.join(
+    "%2C"
+  )}&vs_currencies=usd`;
+// `https://price.market.orai.io/simple/price?ids=${tokens.join('%2C')}&vs_currencies=usd`;
 
 /**
  * Prices of each token.
@@ -25,25 +27,32 @@ export type CoinGeckoPrices<T extends string> = {
  * @returns The CoinGecko prices.
  */
 export const useCoinGeckoPrices = <T extends CoinGeckoId>(
-  options: Omit<UseQueryOptions<CoinGeckoPrices<T>, unknown, CoinGeckoPrices<T>, string[]>, 'queryKey' | 'queryFn'> = {}
+  options: Omit<
+    UseQueryOptions<CoinGeckoPrices<T>, unknown, CoinGeckoPrices<T>, string[]>,
+    "queryKey" | "queryFn"
+  > = {}
 ): UseQueryResult<CoinGeckoPrices<T>, unknown> => {
-  const tokens = [...new Set([...cosmosTokens, ...evmTokens].map((t) => t.coinGeckoId))];
+  const tokens = [
+    ...new Set([...cosmosTokens, ...evmTokens].map((t) => t.coinGeckoId)),
+  ];
   tokens.sort();
 
   // use cached first then update by query, if is limited then return cached version
-  const [cachePrices, setCachePrices] = useConfigReducer('coingecko');
+  const [cachePrices, setCachePrices] = useConfigReducer("coingecko");
 
   return useQuery({
     initialData: cachePrices,
     ...options,
     // make unique
-    queryKey: ['coinGeckoPrices', ...tokens],
+    queryKey: ["coinGeckoPrices", ...tokens],
     queryFn: async ({ signal }) => {
       const prices = await getCoingeckoPrices(tokens, cachePrices, signal);
       setCachePrices(prices);
 
-      return Object.fromEntries(tokens.map((token) => [token, prices[token]])) as CoinGeckoPrices<T>;
-    }
+      return Object.fromEntries(
+        tokens.map((token) => [token, prices[token]])
+      ) as CoinGeckoPrices<T>;
+    },
   });
 };
 
@@ -70,7 +79,7 @@ export const getCoingeckoPrices = async <T extends CoinGeckoId>(
     }
   } catch {
     // remain old cache
-    console.log('error getting coingecko prices: ', prices);
+    console.log("error getting coingecko prices: ", prices);
   }
   return prices;
 };

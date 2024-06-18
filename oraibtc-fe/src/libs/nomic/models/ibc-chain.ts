@@ -50,7 +50,7 @@ export const OraichainChain: IbcChain = {
     channelId: "channel-249",
     port: "transfer",
     nBtcIbcDenom:
-      "ibc/BC8F7A914A05DAD46D7A5411D54891DD5DB99D1124A8FD3A056B889DFD95F124",
+      "ibc/CBC7979082B808A0A9DA4DB44DA17ABEBB615C962F367A1638ED66EE802F66BC",
   },
   destination: {
     channelId: "channel-1",
