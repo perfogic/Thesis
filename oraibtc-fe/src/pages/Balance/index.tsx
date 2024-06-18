@@ -371,7 +371,7 @@ const Balance: React.FC<BalanceProps> = () => {
       throw Error("Not found your oraibtc-subnet address!");
     try {
       const timeoutTimestampSeconds = Math.floor(
-        (Date.now() + 60 * 60 * 1000) / 1000
+        (Date.now() + DEFAULT_TIMEOUT * 1000) / 1000
       );
       const timeoutTimestampNanoseconds = Long.fromNumber(
         timeoutTimestampSeconds
