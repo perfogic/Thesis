@@ -115,6 +115,7 @@ export const PendingDeposits: React.FC<{}> = ({}) => {
     fetchedPendingDeposits,
     checkpointQueue,
   ]);
+
   const handleUpdateTxPending = () => {
     // /**
     //  * @devs: This one will handle update pendingDeposits to localStorage,

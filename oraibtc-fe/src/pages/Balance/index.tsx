@@ -381,7 +381,7 @@ const Balance: React.FC<BalanceProps> = () => {
         typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
         value: {
           sourcePort: "transfer",
-          sourceChannel: "channel-238",
+          sourceChannel: OraichainChain.source.channelId,
           sender: oraiAddress,
           receiver: deriveNomicAddress(oraiAddress),
           token: {
