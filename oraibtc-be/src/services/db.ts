@@ -73,7 +73,7 @@ export const sqlCommands = {
       order: QueryOrderEnum = QueryOrderEnum.DESC
     ) =>
       `SELECT * from Block WHERE height % ${gap} = 0 ORDER BY timestamp ${order} LIMIT ${limit}`,
-    getAvgConfirmationTimeByDays: () => `
+    getAvgConfirmationTimeByDays: (startTime: number, endTime: number) => `
         WITH ConfirmationTimes AS (
           SELECT 
               timestamp,
@@ -85,7 +85,7 @@ export const sqlCommands = {
                 DATE_TRUNC('day', TO_TIMESTAMP(timestamp)) AS day,
                 confirmation_time
             FROM ConfirmationTimes
-            WHERE confirmation_time IS NOT NULL
+            WHERE confirmation_time IS NOT NULL AND timestamp >= ${startTime} AND  timestamp <= ${endTime}
         )
         SELECT 
             day,
@@ -283,14 +283,17 @@ export class DuckDbNode extends DuckDB {
     return [];
   }
 
-  async getAvgConfirmationTimeByDays(): Promise<
+  async getAvgConfirmationTimeByDays(
+    startTime: number,
+    endTime: number
+  ): Promise<
     {
       day: number;
       avg_confirmation_time: number;
     }[]
   > {
     const result = await this.conn.all(
-      sqlCommands.query.getAvgConfirmationTimeByDays()
+      sqlCommands.query.getAvgConfirmationTimeByDays(startTime, endTime)
     );
 
     if (result.length > 0) {

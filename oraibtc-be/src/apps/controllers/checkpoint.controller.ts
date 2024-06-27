@@ -39,8 +39,8 @@ const getAllCharts = catchAsync(async (req: Request, res: Response) => {
   const { startTime, endTime, address } = req.query;
 
   const data = await checkpointService.getAllCharts({
-    startTime: parseInt(startTime as string),
-    endTime: parseInt(endTime as string),
+    startTime: startTime ? parseInt(startTime as string) : 0,
+    endTime: endTime ? parseInt(endTime as string) : new Date().getTime(),
     address: address as string,
   });
 
