@@ -88,10 +88,13 @@ const Analytics: React.FC<{}> = () => {
           tooltipConfig={{
             title: "Block Time",
             formatTimeFunc: formatUTCDateString,
-            formatValueFunc: (price) => price + " minutes",
+            formatValueFunc: (price) =>
+              `${parseInt(price.toString())} seconds (${Math.floor(
+                price / 60
+              )} minutes)`,
           }}
           priceFormatter={(price) => {
-            return price;
+            return parseInt(price.toString());
           }}
         />
       </div>
