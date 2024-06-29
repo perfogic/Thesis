@@ -61,7 +61,7 @@ const Escrow = () => {
           typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
           value: {
             sourcePort: "transfer",
-            sourceChannel: "channel-0",
+            sourceChannel: "channel-1",
             sender: oraiBtcAddress,
             receiver: address,
             token: coin((data?.escrow_balance || 0).toString(), "usat"),
