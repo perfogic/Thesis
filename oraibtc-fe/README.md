@@ -4,22 +4,15 @@
 
 ## Overview
 
-This repository provides frontend code for Oraidex of [Oraichain](https://orai.io).
+This repository provides frontend code for OraiBTC bridge.
 
 ## Prerequisite
 
-- A working contract described [here](https://github.com/oraichain/oraiswap)
 - NodeJS 10+
 
 ## Installation
 
-1. Git clone this repo to desired directory
-
-```shell
-git clone https://github.com/oraichain/oraiswap-frontend.git
-```
-
-2. Install required packages
+1. Install required packages
 
 ```shell
 yarn install

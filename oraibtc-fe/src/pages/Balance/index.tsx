@@ -94,9 +94,10 @@ import useWalletReducer from "hooks/useWalletReducer";
 import { isMobile } from "@walletconnect/browser-utils";
 import { collectWallet } from "libs/cosmjs";
 import { deriveNomicAddress } from "@oraichain/orai-bitcoin";
-import { OraiToken } from "config/chainInfos";
+import { bitcoinTestnet, OraiToken } from "config/chainInfos";
 import { ethers } from "ethers";
 import Long from "long";
+import { network as NetworkConfig } from "config/networks";
 
 interface BalanceProps {}
 
@@ -328,7 +329,7 @@ const Balance: React.FC<BalanceProps> = () => {
       if (rs?.rawTxHex) {
         setTxHash(rs.rawTxHex);
         displayToast(TToastType.TX_SUCCESSFUL, {
-          customLink: `/bitcoin-dashboard?tab=pending_deposits`,
+          customLink: `${bitcoinTestnet.txExplorer.txUrl}${rs.rawTxHex}`,
         });
         setTimeout(async () => {
           await loadTokenAmounts({ oraiAddress, btcAddress: btcAddr });
@@ -403,7 +404,7 @@ const Balance: React.FC<BalanceProps> = () => {
         fromToken.rpc,
         // @ts-ignore-check
         result,
-        "/bitcoin-dashboard?tab=pending_withdraws"
+        `${NetworkConfig.explorer}/txs/${result.transactionHash}`
       );
     } catch (ex) {
       handleErrorTransaction(ex, {

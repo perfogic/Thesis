@@ -106,11 +106,11 @@ export const PendingWithdraws: React.FC<{}> = ({}) => {
       align: "left",
     },
     txid: {
-      name: "Txid",
+      name: "Address",
       width: "60%",
       accessor: (data) => (
-        <div onClick={() => handleNavigate(data.txid)}>
-          <span>{`${data.txid}`}</span>
+        <div onClick={() => handleNavigate(data.address)}>
+          <span>{`${data.address}`}</span>
         </div>
       ),
       sortField: "txid",
