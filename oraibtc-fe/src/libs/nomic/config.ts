@@ -4,7 +4,7 @@ class Config {
   stakingUrl: string;
   rpcUrl: string;
   restUrl: string;
-  relayerUrl: string;
+  relayerUrl: string[];
 
   constructor() {
     this.chainId = "oraibtc-testnet-1";
@@ -12,7 +12,10 @@ class Config {
     this.stakingUrl = "";
     this.rpcUrl = "https://oraibtc-rpc.perfogic.store";
     this.restUrl = "https://oraibtc-rest.perfogic.store";
-    this.relayerUrl = "https://oraibtc-relayer.perfogic.store";
+    this.relayerUrl = [
+      "https://oraibtc-relayer.perfogic.store",
+      "http://139.180.186.128:8999",
+    ];
   }
 }
 

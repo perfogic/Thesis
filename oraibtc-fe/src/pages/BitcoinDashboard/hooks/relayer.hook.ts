@@ -11,19 +11,18 @@ import { PendingDeposit, DepositInfo } from "../@types";
 import { useQuery } from "@tanstack/react-query";
 import { config } from "libs/nomic/config";
 
-const axios = Axios.create({
-  timeout: AXIOS_TIMEOUT,
-  retryTimes: 3,
-  // cache will be enabled by default in 2 seconds
-  adapter: retryAdapterEnhancer(
-    throttleAdapterEnhancer(Axios.defaults.adapter!, {
-      threshold: AXIOS_THROTTLE_THRESHOLD,
-    })
-  ),
-  baseURL: config.relayerUrl,
-});
-
 const getPendingDeposits = async (address?: String): Promise<DepositInfo[]> => {
+  const axios = Axios.create({
+    timeout: AXIOS_TIMEOUT,
+    retryTimes: 3,
+    // cache will be enabled by default in 2 seconds
+    adapter: retryAdapterEnhancer(
+      throttleAdapterEnhancer(Axios.defaults.adapter!, {
+        threshold: AXIOS_THROTTLE_THRESHOLD,
+      })
+    ),
+    baseURL: config.relayerUrl[config.relayerUrl.length - 1],
+  });
   try {
     const res = await axios.get("/pending_deposits", {
       params: {

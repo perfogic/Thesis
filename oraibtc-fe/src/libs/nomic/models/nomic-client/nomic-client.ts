@@ -73,7 +73,7 @@ export class NomicClient implements NomicClientInterface {
         return;
       }
       const config = {
-        relayers: [Config.relayerUrl],
+        relayers: [...Config.relayerUrl],
         channel: OraiBtcSubnetChain.source.channelId, // ibc between oraibtc and orai chain
         network: btcNetwork,
         receiver: receiver, // bech32 address of the depositing user,
