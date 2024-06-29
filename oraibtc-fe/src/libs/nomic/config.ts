@@ -14,7 +14,7 @@ class Config {
     this.restUrl = "https://oraibtc-rest.perfogic.store";
     this.relayerUrl = [
       "https://oraibtc-relayer.perfogic.store",
-      "http://139.180.186.128:8999",
+      "https://oraibtc-relayer2.perfogic.store",
     ];
   }
 }
