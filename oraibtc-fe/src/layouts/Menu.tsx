@@ -153,7 +153,7 @@ const Menu: React.FC = () => {
             <div className={styles.logo}>
               <ToggleIcon onClick={handleToggle} />
               <Link to={'/'} onClick={() => setLink('/')}>
-                <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+                <h1 className={styles.title}>ORAIBTC</h1>
               </Link>
             </div>
             <WalletManagement />
@@ -167,8 +167,8 @@ const Menu: React.FC = () => {
         <div className={classNames(styles.menu)}>
           <div className={styles.menuLeft}>
             <div className={styles.logoWrapper}>
-              <Link to={'/'} onClick={() => setLink('/')} className={styles.logo}>
-                <img src={darkTheme ? LogoFullImgLight : LogoFullImgDark} alt="logo" />
+              <Link to={'/'} onClick={() => setLink('/bitcoin-dashboard')} className={styles.logo}>
+                <h1 className={styles.title}>ORAIBTC</h1>
               </Link>
               <div className={styles.divider}></div>
             </div>
@@ -176,7 +176,7 @@ const Menu: React.FC = () => {
           </div>
           <div className={classNames(styles.menuRight)}>
             <div className={classNames(styles.menu_list_right)}>
-              <div
+              {/* <div
                 onClick={() => {
                   setOtherActive(!otherActive);
                 }}
@@ -200,8 +200,8 @@ const Menu: React.FC = () => {
                     {renderLink('https://t.me/SamORAI_bot', 'Contact us', () => {}, true, <SupportIcon />, false)}
                   </div>
                 }
-              />
-              {renderLink(
+              /> */}
+              {/* {renderLink(
                 '#',
                 'Buy ORAI',
                 () => {
@@ -209,7 +209,7 @@ const Menu: React.FC = () => {
                 },
                 false,
                 <KadoIcon />
-              )}
+              )} */}
             </div>
 
             {openBuy && (
