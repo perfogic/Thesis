@@ -18,6 +18,19 @@ This repository provides frontend code for OraiBTC bridge.
 yarn install
 ```
 
+2. Set up .env
+
+```shell
+REACT_APP_SITE_TITLE=OraiBTC
+REACT_APP_SITE_DESC="OraiBTC is a bridge between Bitcoin and Cosmos"
+
+REACT_APP_BASE_API_URL=https://api.oraidex.io
+
+REACT_APP_KADO_API_KEY=df0d2b3f-d829-4453-a4f6-1d6e8870e8f4
+REACT_APP_MIX_PANEL_ENVIRONMENT=acbafd21a85654933cbb0332c5a6f4f8
+REACT_APP_STRAPI_BASE_URL=https://nice-fireworks-d26703b63e.strapiapp.com
+```
+
 3. Dev it or build it
 
 ```shell
