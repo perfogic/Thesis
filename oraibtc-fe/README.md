@@ -38,10 +38,6 @@ or add this into package.json
 ]
 ```
 
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
 ## License
 
 Released under the [Apache 2.0 License](LICENSE).
