@@ -58,6 +58,7 @@ export const useGetCheckpointQueue = () => {
   const { data } = useQuery(["checkpoint_queue"], getCheckpointQueue, {
     refetchOnWindowFocus: true,
     staleTime: 30 * 1000,
+    refetchInterval: 10000,
   });
   return data;
 };
@@ -80,6 +81,7 @@ export const useGetTotalValueLocked = () => {
   const { data } = useQuery(["value_locked"], () => getTotalValueLocked(), {
     refetchOnWindowFocus: true,
     staleTime: 30 * 1000,
+    refetchInterval: 10000,
   });
   return data;
 };
@@ -142,6 +144,7 @@ export const useGetDepositFee = (checkpointIndex?: number) => {
     {
       refetchOnWindowFocus: true,
       staleTime: 10 * 60 * 1000,
+      refetchInterval: 10000,
     }
   );
   return data;
@@ -177,6 +180,7 @@ export const useGetWithdrawalFee = (
       refetchOnWindowFocus: true,
       enabled: !!btcAddress && !!checkpointIndex,
       staleTime: 10 * 60 * 1000,
+      refetchInterval: 10000,
     }
   );
   return data;
@@ -241,6 +245,7 @@ export const useGetCheckpointData = (checkpointIndex?: number) => {
     {
       refetchOnWindowFocus: true,
       staleTime: 30 * 1000,
+      refetchInterval: 10000,
     }
   );
   return data;
